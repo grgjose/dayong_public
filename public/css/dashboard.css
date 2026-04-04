@@ -1,0 +1,63 @@
+/* Dashboard CSS */
+.modal {
+        overflow-y:auto !important;
+    }
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.beneficiary-remove-btn {
+    position: absolute;
+    top: -14px;        /* move ABOVE the fieldset border */
+    right: 0px;      /* slightly outside for balance */
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    font-size: 18px;
+    line-height: 26px;
+    z-index: 5;
+}
+
+.beneficiary-1 { border: 2px solid #28a745 !important; } /* Green */
+.beneficiary-2 { border: 2px solid #8a2be2 !important; } /* Violet */
+.beneficiary-3 { border: 2px solid #ffc107 !important; } /* Yellow */
+.beneficiary-4 { border: 2px solid #4169e1 !important; } /* Royal Blue */
+
+.text-uppercase {
+    text-transform: uppercase;
+}
+
+/* ONLY #program_id chosen field */
+#program_id.is-invalid + .chosen-container .chosen-single,
+#program_id.is-invalid + .chosen-container .chosen-choices {
+    border: 1px solid #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+
+.chosen-container-single {
+    border-radius: 5px;
+    height: calc(2.25rem + 2px);
+    /* padding-top: 10px; */
+}
+
+.class-with-tooltip:hover:after{
+    opacity: 1;
+    transition: all 0.8s ease 0.5s;
+    visibility: visible;
+}
+
+.class-with-tooltip:after{
+    content: attr(data-title);
+    position: absolute;
+    padding: 5px;
+    border: 1px solid gray;
+    background: black;
+    font-size: 14px;
+    visibility: hidden;
+}
