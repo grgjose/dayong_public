@@ -301,866 +301,1012 @@
       }
     </script>
 
-<!-- Modules Scripts -->
-<script>
+    <!-- Modules Scripts -->
+    <script>
 
-  let beneficiaryIndex = 0;
-  const maxBeneficiaries = 20;
-  let membersFormToSubmit = null;
-  let orCheckTimer = null;
+    let beneficiaryIndex = 0;
+    const maxBeneficiaries = 20;
+    let membersFormToSubmit = null;
+    let orCheckTimer = null;
 
-    function renumberBeneficiaries() 
-    {
-    document.querySelectorAll('.beneficiaries').forEach((fs, i) => {
-        const number = i + 1;
+        function renumberBeneficiaries() 
+        {
+        document.querySelectorAll('.beneficiaries').forEach((fs, i) => {
+            const number = i + 1;
 
-        // Update legend
-        fs.querySelector('.beneficiary-legend').textContent =
-            `Beneficiaries #${number}`;
+            // Update legend
+            fs.querySelector('.beneficiary-legend').textContent =
+                `Beneficiaries #${number}`;
 
-        // Remove previous color classes
-        fs.classList.remove(
-            'beneficiary-1',
-            'beneficiary-2',
-            'beneficiary-3',
-            'beneficiary-4'
-        );
+            // Remove previous color classes
+            fs.classList.remove(
+                'beneficiary-1',
+                'beneficiary-2',
+                'beneficiary-3',
+                'beneficiary-4'
+            );
 
-        // Apply color sequence (1 → 4)
-        const colorClass = `beneficiary-${((number - 1) % 4) + 1}`;
-        fs.classList.add(colorClass);
-    });
+            // Apply color sequence (1 → 4)
+            const colorClass = `beneficiary-${((number - 1) % 4) + 1}`;
+            fs.classList.add(colorClass);
+        });
 
-    $(".chosen-select").chosen({
-        no_results_text: "Oops, nothing found!",
-        width: "100%"
-    });
+        $(".chosen-select").chosen({
+            no_results_text: "Oops, nothing found!",
+            width: "100%"
+        });
 
-    }
+        }
 
-    function toggleNewSales() 
-    {
-    if ($('#add_new_sales').is(':checked')) {
-        $('.newsales').slideDown();
-    } else {
-        $('.newsales').slideUp();
-    }
-    }
+        function toggleNewSales() 
+        {
+        if ($('#add_new_sales').is(':checked')) {
+            $('.newsales').slideDown();
+        } else {
+            $('.newsales').slideUp();
+        }
+        }
 
-    function toggleSubmit(valid)
-    {
-    $('button[type="submit"]').prop('disabled', !valid);
-    }
+        function toggleSubmit(valid)
+        {
+        $('button[type="submit"]').prop('disabled', !valid);
+        }
 
-    function membersShowForm()
-    {
-        $("#table").attr("style", "display: none;");
-        $("#form").removeAttr("style");
-    }
+        function membersShowForm()
+        {
+            $("#table").attr("style", "display: none;");
+            $("#form").removeAttr("style");
+        }
 
-    function membersHideForm()
-    {
-        $("#form").attr("style", "display: none;");
-        $("#view").attr("style", "display: none;");
-        $("#view").html("");
-        $("#table").removeAttr("style");
-    }
+        function membersHideForm()
+        {
+            $("#form").attr("style", "display: none;");
+            $("#view").attr("style", "display: none;");
+            $("#view").html("");
+            $("#table").removeAttr("style");
+        }
 
-    function membersLoadView(id)
-    {
-        $("#view").load('/members/view/' + id);
+        function membersLoadView(id)
+        {
+            $("#view").load('/members/view/' + id);
+            $("#table").attr("style", "display: none;");
+            $("#view").removeAttr("style");
+        }
+
+        function membersLoadEdit(id)
+        {
         $("#table").attr("style", "display: none;");
         $("#view").removeAttr("style");
-    }
 
-    function membersLoadEdit(id)
-    {
-    $("#table").attr("style", "display: none;");
-    $("#view").removeAttr("style");
+        $("#view").load('/members/edit/' + id, function () {
 
-    $("#view").load('/members/edit/' + id, function () {
+            // destroy previous chosen instance if any
+            $(".chosen-select").chosen("destroy");
 
-        // destroy previous chosen instance if any
-        $(".chosen-select").chosen("destroy");
+            // re-init
+            $(".chosen-select").chosen({
+            no_results_text: "Oops, nothing found!",
+            width: "100%"
+            });
 
-        // re-init
-        $(".chosen-select").chosen({
-        no_results_text: "Oops, nothing found!",
-        width: "100%"
         });
-
-    });
-    }
-
-    function membersPrepareDelete(id)
-    {
-        var fname = $("#" + id + "_fname").html();
-        var lname = $("#" + id + "_lname").html();
-
-        $("#del_fname").html(fname);
-        $("#del_lname").html(lname);
-        $("#delete_id").val(id);
-    }
-
-    function membersPrintSOA(id)
-    {
-        window.open('/members/print/' + id);
-    }
-
-    function membersConfirmRegistration()
-    {
-        // Get the Add Member form inside #form
-        membersFormToSubmit = $("#form form");
-
-        let summary = "";
-
-        // ===================== MEMBER INFO =====================
-        summary += "=== MEMBER INFORMATION ===\n";
-        summary += "FIRST NAME: " + ($("#fname").val() || "") + "\n";
-        summary += "MIDDLE NAME: " + ($("#mname").val() || "") + "\n";
-        summary += "LAST NAME: " + ($("#lname").val() || "") + "\n";
-        summary += "EXT: " + ($("#ext").val() || "") + "\n";
-        summary += "BIRTHDATE: " + ($("#birthdate").val() || "") + "\n";
-        summary += "SEX: " + ($("#sex").val() || "") + "\n";
-        summary += "BIRTHPLACE: " + ($("#birthplace").val() || "") + "\n";
-        summary += "CITIZENSHIP: " + ($("#citizenship").val() || "") + "\n";
-        summary += "CIVIL STATUS: " + ($("#civil_status").val() || "") + "\n";
-        summary += "CONTACT #: " + ($("#contact_num").val() || "") + "\n";
-        summary += "EMAIL: " + ($("#email").val() || "") + "\n";
-        summary += "ADDRESS: " + ($("#address").val() || "") + "\n\n";
-
-        // ===================== CLAIMANT INFO =====================
-        summary += "=== CLAIMANT INFORMATION ===\n";
-        summary += "FIRST NAME: " + ($("#fname_c").val() || "") + "\n";
-        summary += "MIDDLE NAME: " + ($("#mname_c").val() || "") + "\n";
-        summary += "LAST NAME: " + ($("#lname_c").val() || "") + "\n";
-        summary += "EXT: " + ($("#ext_c").val() || "") + "\n";
-        summary += "BIRTHDATE: " + ($("#birthdate_c").val() || "") + "\n";
-        summary += "SEX: " + ($("#sex_c").val() || "") + "\n";
-        summary += "CONTACT #: " + ($("#contact_num_c").val() || "") + "\n\n";
-
-        // ===================== BENEFICIARIES =====================
-        summary += "=== BENEFICIARIES ===\n";
-
-        let beneficiaryCount = 0;
-
-        $("#beneficiaries-container fieldset").each(function (i) {
-            beneficiaryCount++;
-
-            const fname = $(this).find("input[name*='[fname]']").val() || "";
-            const mname = $(this).find("input[name*='[mname]']").val() || "";
-            const lname = $(this).find("input[name*='[lname]']").val() || "";
-            const ext = $(this).find("input[name*='[ext]']").val() || "";
-
-            const birthdate = $(this).find("input[name*='[birthdate]']").val() || "";
-            const sex = $(this).find("select[name*='[sex]']").val() || "";
-            const relationship = $(this).find("input[name*='[relationship]']").val() || "";
-            const contact_num = $(this).find("input[name*='[contact_num]']").val() || "";
-
-            summary += "BENEFICIARY #" + (i + 1) + "\n";
-            summary += "NAME: " + fname + " " + mname + " " + lname + " " + ext + "\n";
-            summary += "BIRTHDATE: " + birthdate + "\n";
-            summary += "SEX: " + sex + "\n";
-            summary += "RELATIONSHIP: " + relationship + "\n";
-            summary += "CONTACT #: " + contact_num + "\n\n";
-        });
-
-        if (beneficiaryCount === 0) {
-            summary += "NO BENEFICIARIES ADDED.\n\n";
         }
 
-        // ===================== NEW SALES INFO =====================
-        summary += "=== NEW SALES INFORMATION ===\n";
-        summary += "BRANCH: " + ($("#branch_id option:selected").text() || "") + "\n";
-        summary += "PROGRAM: " + ($("#program_id option:selected").text() || "") + "\n";
-        summary += "OR #: " + ($("#or_number").val() || "") + "\n";
-        summary += "OR DATE: " + ($("#or_date").val() || "") + "\n";
-        summary += "APPLICATION #: " + ($("#app_no").val() || "") + "\n";
-        summary += "REGISTRATION FEE: " + ($("#registration_fee").val() || "") + "\n";
-        summary += "MAS: " + ($("#agent_id option:selected").text() || "") + "\n";
-        summary += "AMOUNT: " + ($("#amount").val() || "") + "\n";
-        summary += "INCENTIVES: " + ($("#incentives").val() || "") + "\n";
+        function membersPrepareDelete(id)
+        {
+            var fname = $("#" + id + "_fname").html();
+            var lname = $("#" + id + "_lname").html();
 
-        // ✅ Force everything to ALL CAPS (labels + values)
-        summary = summary.toUpperCase();
-
-        // Put summary into modal
-        $("#registration-summary").text(summary);
-
-        // Show modal
-        $("#ConfirmRegisterModal").modal("show");
-    }
-
-    function confirmMemberSubmit()
-    {
-        if (membersFormToSubmit) {
-            membersFormToSubmit.submit();
-        }
-    }
-
-    function membersCheckORNumber()
-    {
-        const orNumber = $("#or_number").val();
-
-        // If empty, clear warning
-        if (!orNumber) {
-            $("#or-warning").hide().text("");
-            $("#or_number").removeClass("is-invalid");
-            return;
+            $("#del_fname").html(fname);
+            $("#del_lname").html(lname);
+            $("#delete_id").val(id);
         }
 
-        // Optional debounce (prevents too many requests)
-        clearTimeout(orCheckTimer);
+        function membersPrintSOA(id)
+        {
+            window.open('/members/print/' + id);
+        }
 
-        orCheckTimer = setTimeout(function () {
+        function membersConfirmRegistration()
+        {
+            // Get the Add Member form inside #form
+            membersFormToSubmit = $("#form form");
 
-            $.ajax({
-                url: "/members/check-or-number",
-                method: "GET",
-                data: { or_number: orNumber },
-                success: function (res) {
-                    if (res.exists) {
-                        $("#or-warning").show().text(res.message);
-                        $("#or_number").addClass("is-invalid");
-                    } else {
+            let summary = "";
+
+            // ===================== MEMBER INFO =====================
+            summary += "=== MEMBER INFORMATION ===\n";
+            summary += "FIRST NAME: " + ($("#fname").val() || "") + "\n";
+            summary += "MIDDLE NAME: " + ($("#mname").val() || "") + "\n";
+            summary += "LAST NAME: " + ($("#lname").val() || "") + "\n";
+            summary += "EXT: " + ($("#ext").val() || "") + "\n";
+            summary += "BIRTHDATE: " + ($("#birthdate").val() || "") + "\n";
+            summary += "SEX: " + ($("#sex").val() || "") + "\n";
+            summary += "BIRTHPLACE: " + ($("#birthplace").val() || "") + "\n";
+            summary += "CITIZENSHIP: " + ($("#citizenship").val() || "") + "\n";
+            summary += "CIVIL STATUS: " + ($("#civil_status").val() || "") + "\n";
+            summary += "CONTACT #: " + ($("#contact_num").val() || "") + "\n";
+            summary += "EMAIL: " + ($("#email").val() || "") + "\n";
+            summary += "ADDRESS: " + ($("#address").val() || "") + "\n\n";
+
+            // ===================== CLAIMANT INFO =====================
+            summary += "=== CLAIMANT INFORMATION ===\n";
+            summary += "FIRST NAME: " + ($("#fname_c").val() || "") + "\n";
+            summary += "MIDDLE NAME: " + ($("#mname_c").val() || "") + "\n";
+            summary += "LAST NAME: " + ($("#lname_c").val() || "") + "\n";
+            summary += "EXT: " + ($("#ext_c").val() || "") + "\n";
+            summary += "BIRTHDATE: " + ($("#birthdate_c").val() || "") + "\n";
+            summary += "SEX: " + ($("#sex_c").val() || "") + "\n";
+            summary += "CONTACT #: " + ($("#contact_num_c").val() || "") + "\n\n";
+
+            // ===================== BENEFICIARIES =====================
+            summary += "=== BENEFICIARIES ===\n";
+
+            let beneficiaryCount = 0;
+
+            $("#beneficiaries-container fieldset").each(function (i) {
+                beneficiaryCount++;
+
+                const fname = $(this).find("input[name*='[fname]']").val() || "";
+                const mname = $(this).find("input[name*='[mname]']").val() || "";
+                const lname = $(this).find("input[name*='[lname]']").val() || "";
+                const ext = $(this).find("input[name*='[ext]']").val() || "";
+
+                const birthdate = $(this).find("input[name*='[birthdate]']").val() || "";
+                const sex = $(this).find("select[name*='[sex]']").val() || "";
+                const relationship = $(this).find("input[name*='[relationship]']").val() || "";
+                const contact_num = $(this).find("input[name*='[contact_num]']").val() || "";
+
+                summary += "BENEFICIARY #" + (i + 1) + "\n";
+                summary += "NAME: " + fname + " " + mname + " " + lname + " " + ext + "\n";
+                summary += "BIRTHDATE: " + birthdate + "\n";
+                summary += "SEX: " + sex + "\n";
+                summary += "RELATIONSHIP: " + relationship + "\n";
+                summary += "CONTACT #: " + contact_num + "\n\n";
+            });
+
+            if (beneficiaryCount === 0) {
+                summary += "NO BENEFICIARIES ADDED.\n\n";
+            }
+
+            // ===================== NEW SALES INFO =====================
+            summary += "=== NEW SALES INFORMATION ===\n";
+            summary += "BRANCH: " + ($("#branch_id option:selected").text() || "") + "\n";
+            summary += "PROGRAM: " + ($("#program_id option:selected").text() || "") + "\n";
+            summary += "OR #: " + ($("#or_number").val() || "") + "\n";
+            summary += "OR DATE: " + ($("#or_date").val() || "") + "\n";
+            summary += "APPLICATION #: " + ($("#app_no").val() || "") + "\n";
+            summary += "REGISTRATION FEE: " + ($("#registration_fee").val() || "") + "\n";
+            summary += "MAS: " + ($("#agent_id option:selected").text() || "") + "\n";
+            summary += "AMOUNT: " + ($("#amount").val() || "") + "\n";
+            summary += "INCENTIVES: " + ($("#incentives").val() || "") + "\n";
+
+            // ✅ Force everything to ALL CAPS (labels + values)
+            summary = summary.toUpperCase();
+
+            // Put summary into modal
+            $("#registration-summary").text(summary);
+
+            // Show modal
+            $("#ConfirmRegisterModal").modal("show");
+        }
+
+        function confirmMemberSubmit()
+        {
+            if (membersFormToSubmit) {
+                membersFormToSubmit.submit();
+            }
+        }
+
+        function membersCheckORNumber()
+        {
+            const orNumber = $("#or_number").val();
+
+            // If empty, clear warning
+            if (!orNumber) {
+                $("#or-warning").hide().text("");
+                $("#or_number").removeClass("is-invalid");
+                return;
+            }
+
+            // Optional debounce (prevents too many requests)
+            clearTimeout(orCheckTimer);
+
+            orCheckTimer = setTimeout(function () {
+
+                $.ajax({
+                    url: "/members/check-or-number",
+                    method: "GET",
+                    data: { or_number: orNumber },
+                    success: function (res) {
+                        if (res.exists) {
+                            $("#or-warning").show().text(res.message);
+                            $("#or_number").addClass("is-invalid");
+                        } else {
+                            $("#or-warning").hide().text("");
+                            $("#or_number").removeClass("is-invalid");
+                        }
+                    },
+                    error: function () {
+                        // If API fails, don't block user, just hide warning
                         $("#or-warning").hide().text("");
                         $("#or_number").removeClass("is-invalid");
                     }
-                },
-                error: function () {
-                    // If API fails, don't block user, just hide warning
-                    $("#or-warning").hide().text("");
-                    $("#or_number").removeClass("is-invalid");
-                }
-            });
-
-        }, 200);
-    }
-
-    function newSalesShowForm() 
-    {
-        $("#newSalesTable").hide();
-        $("#newSalesForm").show();
-    }
-
-    function newSalesHideForm() 
-    {
-        $("#newSalesForm").hide();
-        $("#newSalesView").hide().html("");
-        $("#newSalesTable").show();
-    }
-
-    function newSalesViewFunction(id) 
-    {
-        $("#newSalesView").load('/new-sales/view/' + id).show();
-        $("#newSalesTable").hide();
-    }
-
-    function newSalesEditFunction(id) 
-    {
-        $("#newSalesView").load('/new-sales/edit/' + id).show();
-        $("#newSalesTable").hide();
-    }
-
-    function newSalesDeleteFunction(id) 
-    {
-        $("#delete_id").val(id);
-    }
-
-    function newSalesPrintFunction(id) 
-    {
-        window.open('/members/print/' + id);
-    }
-
-    function newSalesMemberChange()
-    {
-        let selected = $("#member_id option:selected");
-
-        let branchId = selected.data("branch");
-        let agentId  = selected.data("agent");
-
-        // Set Branch
-        $("#branch_id").val(branchId).trigger("chosen:updated");
-
-        // update hidden field
-        $("#branch_id_hidden").val(branchId);
-
-        // disable visible select
-        $("#branch_id").prop("disabled", true).trigger("chosen:updated");
-
-        // Set Agent (NOT disabled)
-        $("#agent_id").val(agentId).trigger("chosen:updated");
-
-        // Load programs for this member
-        loadMemberProgramsAlt($("#member_id").val());
-    }
-
-    function dateEntryHideForm()
-    {
-        $("#form").attr("style", "display: none;");
-        $("#edit_form").attr("style", "display: none;");
-        $("#view").attr("style", "display: none;");
-        $("#view").html("");
-        $("#table").removeAttr("style");
-    }
-
-    function dateEntryShowForm()
-    {
-        $("#table").attr("style", "display: none;");
-        $("#form").removeAttr("style");
-    }
-
-    function dateEntryViewFunction(id)
-    {
-        $("#view").load('/entries/view/' + id);
-        $("#table").attr("style", "display: none;");
-        $("#view").removeAttr("style");
-    }
-
-    function dateEntryEditFunction(id)
-    {
-        $("#view").load('/entries/edit/' + id);
-        $("#table").attr("style", "display: none;");
-        $("#view").removeAttr("style");
-    }
-
-    function dateEntryDeleteFunction(id)
-    {
-        var display = $("#branch_" + id).html();
-        $("#del_display").html(display);
-        $("#delete_id").val(id);
-    }
-
-    function dateEntryCheckAutoFills()
-    {
-        $("#temp").load(
-            "/entries/getIncentivesMatrix/" +
-            $("#member_id").val() + "/" +
-            $("#program_id").val(),
-            function(response, status, xhr)
-            {
-                if (status == "error")
-                {
-                    var msg = "Sorry but there was an error: ";
-                    $("#error").html(msg + xhr.status + " " + xhr.statusText);
-                    window.alert(msg + xhr.status + " " + xhr.statusText);
-                }
-
-                if (status == "success")
-                {
-                    $("#incentives").val(response);
-                }
-            }
-        );
-    }
-
-    function dateEntryFormatDate(date)
-    {
-        var d = new Date(date),
-        month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear();
-
-        if (month.length < 2) month = '0' + month;
-        if (day.length < 2) day = '0' + day;
-
-        return [year, month, day].join('-');
-    }
-
-    function dateEntryEnforceMinMax(el)
-    {
-        if (el.value != "")
-        {
-            if (parseInt(el.value) < parseInt(el.min))
-            el.value = el.min;
-
-            if (parseInt(el.value) > parseInt(el.max))
-            el.value = el.max;
-        }
-    }
-
-    function dateEntryMemberChanged()
-    {
-        let selected = $("#member_id option:selected");
-
-        let branchId = selected.data("branch");
-        let agentId  = selected.data("agent");
-
-        // Set Branch
-        $("#branch_id").val(branchId).trigger("chosen:updated");
-
-        // update hidden field
-        $("#branch_id_hidden").val(branchId);
-
-        // disable visible select
-        $("#branch_id").prop("disabled", true).trigger("chosen:updated");
-
-        // Set Agent (NOT disabled)
-        $("#agent_id").val(agentId).trigger("chosen:updated");
-
-        // Load programs for this member
-        loadMemberPrograms($("#member_id").val());
-    }
-
-    function formatDate(dateObj) 
-    {
-        let yyyy = dateObj.getFullYear();
-        let mm = String(dateObj.getMonth() + 1).padStart(2, "0");
-        let dd = String(dateObj.getDate()).padStart(2, "0");
-        return yyyy + "-" + mm + "-" + dd;
-    }
-
-    function getBeneficiaryBirthdates() 
-    {
-        let birthdates = [];
-
-        $('.beneficiary-birthdate').each(function () {
-            const value = $(this).val();
-
-            if (value) {
-                birthdates.push({
-                    id: this.id,
-                    birthdate: value
                 });
-            }
-        });
 
-        return birthdates;
-    }
-
-    function validateProgram() 
-    {
-    let birthdate  = $('#birthdate').val();
-    let program_id = $('#program_id').val();
-    let birthdates = getBeneficiaryBirthdates();
-
-    if (!birthdate || !program_id) return;
-
-    $.ajax({
-        url: '/members/validateProgram',
-        type: 'POST',
-        data: {
-            birthdate: birthdate,
-            program_id: program_id,
-            beneficiaries: birthdates,
-            _token: $('meta[name="csrf-token"]').attr('content'),
-        },
-        success: function (res) {
-            if(res.valid == true){
-                // valid
-                $('#program-age-warning').hide().text("");
-                $('#program_id').removeClass('is-invalid');
-                $('#birthdate').removeClass('is-invalid');
-                $('.beneficiary-birthdate').removeClass('is-invalid');
-
-                //toggleSubmit(true);
-            } else {
-                // invalid
-                let message = res.messages.join('<br>');
-                $('#program-age-warning').show().html(message);
-                $('#program_id').addClass('is-invalid');
-
-                if(res.member_valid == false){
-                    $('#birthdate').addClass('is-invalid');
-                } else {
-                    $('#birthdate').removeClass('is-invalid');
-                }
-
-                // Clear all invalid classes first
-                $('.beneficiary-birthdate').removeClass('is-invalid');
-
-                if (Array.isArray(res.invalidBeneficiaries)) {
-                res.invalidBeneficiaries.forEach(b => {
-                    $('#' + b.id).addClass('is-invalid');
-                });
-                }
-                //toggleSubmit(false);    
-            }
-            console.log(res.messages);
-            console.log(res.valid);
-        },
-        error: function (xhr) {
-            if (xhr.status === 422) {
-                let res = xhr.responseJSON;
-                alert(res.messages);
-            }
-            console.error('Program validation failed');
+            }, 200);
         }
-    });
-    }
 
-    function calculateAmount()
-    {
-        let selectedProgram = $("#program_id option:selected");
-        let amountMin = parseFloat(selectedProgram.data("amount")) || 0;
-
-        let payments = parseInt($("#times").val());
-        if (!payments || payments < 1) payments = 1;
-
-        let computedAmount = amountMin * payments;
-
-        $("#amount").val(computedAmount.toFixed(2));
-
-        checkAmountWarning();
-    }
-
-    // For Data Entry, we want to load all programs (including those that may be disabled for new sales)
-    function loadMemberPrograms(memberId)
-    {
-        $.get("/entries/getMemberPrograms/" + memberId, function(data)
+        function newSalesShowForm() 
         {
-            let programSelect = $("#program_id");
-            programSelect.empty();
+            $("#newSalesTable").hide();
+            $("#newSalesForm").show();
+        }
 
-            $.each(data, function(index, program)
-            {
-                programSelect.append(
-                    `<option value="${program.id}" 
-                        data-amount="${program.amount_min}">
-                        ${program.code}
-                    </option>`
-                );
-            });
-
-            programSelect.trigger("chosen:updated");
-
-            // Auto trigger calculation after load
-            calculateAmount();
-        });
-    }
-
-    // For New Sales
-    function loadMemberProgramsAlt(memberId)
-    {
-        $.get("/entries/getMemberPrograms/" + memberId, function(data)
+        function newSalesHideForm() 
         {
-            let programSelect = $("#program_id");
-            programSelect.empty();
+            $("#newSalesForm").hide();
+            $("#newSalesView").hide().html("");
+            $("#newSalesTable").show();
+        }
 
-            $.each(data, function(index, program)
-            {
-                programSelect.append(
-                    `<option value="${program.id}" 
-                        data-amount="${program.amount_min}">
-                        ${program.code}
-                    </option>`
-                );
-            });
-
-            programSelect.trigger("chosen:updated");
-
-            // Auto trigger calculation after load
-            calculateAmount();
-        });
-    }
-
-    function checkAmountWarning()
-    {
-        let selectedProgram = $("#program_id option:selected");
-        let amountMin = parseFloat(selectedProgram.data("amount")) || 0;
-
-        let payments = parseInt($("#times").val());
-        if (!payments || payments < 1) payments = 1;
-
-        let expected = amountMin * payments;
-        let currentAmount = parseFloat($("#amount").val()) || 0;
-
-        if (currentAmount != expected)
+        function newSalesViewFunction(id) 
         {
-            $("#amount-warning").html(
-                `WARNING: Expected amount is ${expected.toFixed(2)} 
-                (${amountMin} × ${payments})`
+            $("#newSalesView").load('/new-sales/view/' + id).show();
+            $("#newSalesTable").hide();
+        }
+
+        function newSalesEditFunction(id) 
+        {
+            $("#newSalesView").load('/new-sales/edit/' + id).show();
+            $("#newSalesTable").hide();
+        }
+
+        function newSalesDeleteFunction(id) 
+        {
+            $("#delete_id").val(id);
+        }
+
+        function newSalesPrintFunction(id) 
+        {
+            window.open('/members/print/' + id);
+        }
+
+        function newSalesMemberChange()
+        {
+            let selected = $("#member_id option:selected");
+
+            let branchId = selected.data("branch");
+            let agentId  = selected.data("agent");
+
+            // Set Branch
+            $("#branch_id").val(branchId).trigger("chosen:updated");
+
+            // update hidden field
+            $("#branch_id_hidden").val(branchId);
+
+            // disable visible select
+            $("#branch_id").prop("disabled", true).trigger("chosen:updated");
+
+            // Set Agent (NOT disabled)
+            $("#agent_id").val(agentId).trigger("chosen:updated");
+
+            // Load programs for this member
+            loadMemberProgramsAlt($("#member_id").val());
+        }
+
+        function dataEntryHideForm()
+        {
+            $("#form").attr("style", "display: none;");
+            $("#edit_form").attr("style", "display: none;");
+            $("#view").attr("style", "display: none;");
+            $("#view").html("");
+            $("#table").removeAttr("style");
+        }
+
+        function dataEntryShowForm()
+        {
+            $("#table").attr("style", "display: none;");
+            $("#form").removeAttr("style");
+        }
+
+        function dataEntryViewFunction(id)
+        {
+            $("#view").load('/entries/view/' + id);
+            $("#table").attr("style", "display: none;");
+            $("#view").removeAttr("style");
+        }
+
+        function dataEntryEditFunction(id)
+        {
+            $("#view").load('/entries/edit/' + id);
+            $("#table").attr("style", "display: none;");
+            $("#view").removeAttr("style");
+        }
+
+        function dataEntryDeleteFunction(id)
+        {
+            var display = $("#branch_" + id).html();
+            $("#del_display").html(display);
+            $("#delete_id").val(id);
+        }
+
+        function dataEntryCheckAutoFills()
+        {
+            $("#temp").load(
+                "/entries/getIncentivesMatrix/" +
+                $("#member_id").val() + "/" +
+                $("#program_id").val(),
+                function(response, status, xhr)
+                {
+                    if (status == "error")
+                    {
+                        var msg = "Sorry but there was an error: ";
+                        $("#error").html(msg + xhr.status + " " + xhr.statusText);
+                        window.alert(msg + xhr.status + " " + xhr.statusText);
+                    }
+
+                    if (status == "success")
+                    {
+                        $("#incentives").val(response);
+                    }
+                }
             );
-            $("#amount-warning").show();
-            $('#amount').addClass('is-invalid');
         }
-        else
+
+        function dataEntryFormatDate(date)
         {
-            $("#amount-warning").html("");
-            $("#amount-warning").hide();
-            $('#amount').removeClass('is-invalid');
+            var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+            if (month.length < 2) month = '0' + month;
+            if (day.length < 2) day = '0' + day;
+
+            return [year, month, day].join('-');
         }
-    }
 
-    // Trigger check when user changes OR, leaves field, or types
-    $(document).on("blur", "#or_number", function () {
-        membersCheckORNumber();
-    });
-
-    const monthFromField = document.getElementById('month_from');
-
-    if(monthFromField)
-    {
-        // Month From and Month to Calculation in Data Entry
-        $("#times, #month_from").on("change keyup", function()
+        function dataEntryEnforceMinMax(el)
         {
-            let times = parseInt($("#times").val());
-            let from  = $("#month_from").val();
-
-            if (!times || !from) return;
-
-            let date = new Date(from + "-01");
-
-            date.setMonth(date.getMonth() + (times - 1));
-
-            let yyyy = date.getFullYear();
-            let mm   = String(date.getMonth() + 1).padStart(2, '0');
-
-            let computedTo = yyyy + "-" + mm;
-
-            $("#month_to").val(computedTo);
-        });
-
-        $("#month_to").on("change", function()
-        {
-            let from = $("#month_from").val();
-            let to   = $("#month_to").val();
-
-            if (to < from)
+            if (el.value != "")
             {
-                alert("To-month must be greater than or equal to From-month.");
-                $("#month_to").val(from);
+                if (parseInt(el.value) < parseInt(el.min))
+                el.value = el.min;
+
+                if (parseInt(el.value) > parseInt(el.max))
+                el.value = el.max;
             }
-        });
-
-        $("#program_id").on("change", function() {
-            calculateAmount();
-        });
-
-        $("#times").on("change keyup", function() {
-            calculateAmount();
-        });
-
-        $("#amount").on("keyup change", function() {
-            checkAmountWarning();
-        });
-    }
-
-    const addBtn = document.getElementById('add-beneficiary');
-
-    if (addBtn) 
-    {
-        addBtn.addEventListener('click', () => {
-            const container = document.getElementById('beneficiaries-container');
-
-            if (!container) return;
-
-            if (container.children.length >= maxBeneficiaries) {
-                toastr.error("Maximum number of " + maxBeneficiaries + " beneficiaries reached");
-                return;
-            }
-
-            const templateEl = document.getElementById('beneficiary-template');
-            if (!templateEl) return;
-
-            const html = templateEl.innerHTML.replaceAll('__INDEX__', beneficiaryIndex);
-
-            const wrapper = document.createElement('div');
-            wrapper.innerHTML = html;
-
-            const fieldset = wrapper.firstElementChild;
-
-            const removeBtn = fieldset.querySelector('.beneficiary-remove-btn');
-            if (removeBtn) {
-                removeBtn.addEventListener('click', () => {
-                    fieldset.remove();
-                    renumberBeneficiaries();
-                    validateProgram();
-                });
-            }
-
-            container.appendChild(fieldset);
-            beneficiaryIndex++;
-            renumberBeneficiaries();
-        });
-    }
-
-    const memberId = document.getElementById('add-member_id');
-
-    if (memberId) 
-    {
-    $(document).on('change', '#member_id', function () {
-        const memberId = $(this).val();
-        const $programSelect = $('select[name="program_id"]');
-
-        // Reset first (important)
-        $programSelect.find('option').prop('disabled', false);
-
-        if (!memberId || memberId === '0') {
-            $programSelect.trigger('chosen:updated');
-            return;
         }
+
+        function dataEntryMemberChanged()
+        {
+            let selected = $("#member_id option:selected");
+
+            let branchId = selected.data("branch");
+            let agentId  = selected.data("agent");
+
+            // Set Branch
+            $("#branch_id").val(branchId).trigger("chosen:updated");
+
+            // update hidden field
+            $("#branch_id_hidden").val(branchId);
+
+            // disable visible select
+            $("#branch_id").prop("disabled", true).trigger("chosen:updated");
+
+            // Set Agent (NOT disabled)
+            $("#agent_id").val(agentId).trigger("chosen:updated");
+
+            // Load programs for this member
+            loadMemberPrograms($("#member_id").val());
+        }
+
+        function formatDate(dateObj) 
+        {
+            let yyyy = dateObj.getFullYear();
+            let mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+            let dd = String(dateObj.getDate()).padStart(2, "0");
+            return yyyy + "-" + mm + "-" + dd;
+        }
+
+        function getBeneficiaryBirthdates() 
+        {
+            let birthdates = [];
+
+            $('.beneficiary-birthdate').each(function () {
+                const value = $(this).val();
+
+                if (value) {
+                    birthdates.push({
+                        id: this.id,
+                        birthdate: value
+                    });
+                }
+            });
+
+            return birthdates;
+        }
+
+        function validateProgram() 
+        {
+        let birthdate  = $('#birthdate').val();
+        let program_id = $('#program_id').val();
+        let birthdates = getBeneficiaryBirthdates();
+
+        if (!birthdate || !program_id) return;
 
         $.ajax({
-        url: '/new-sales/check-member-programs',
-        type: 'POST',
-        data: {
-            member_id: memberId,
+            url: '/members/validateProgram',
+            type: 'POST',
+            data: {
+                birthdate: birthdate,
+                program_id: program_id,
+                beneficiaries: birthdates,
+                _token: $('meta[name="csrf-token"]').attr('content'),
+            },
+            success: function (res) {
+                if(res.valid == true){
+                    // valid
+                    $('#program-age-warning').hide().text("");
+                    $('#program_id').removeClass('is-invalid');
+                    $('#birthdate').removeClass('is-invalid');
+                    $('.beneficiary-birthdate').removeClass('is-invalid');
 
+                    //toggleSubmit(true);
+                } else {
+                    // invalid
+                    let message = res.messages.join('<br>');
+                    $('#program-age-warning').show().html(message);
+                    $('#program_id').addClass('is-invalid');
 
-            
-            _token: '{{ csrf_token() }}'
-        },
-        success: function (res) {
-            if (!Array.isArray(res.registered_descriptions)) {
-                return;
+                    if(res.member_valid == false){
+                        $('#birthdate').addClass('is-invalid');
+                    } else {
+                        $('#birthdate').removeClass('is-invalid');
+                    }
+
+                    // Clear all invalid classes first
+                    $('.beneficiary-birthdate').removeClass('is-invalid');
+
+                    if (Array.isArray(res.invalidBeneficiaries)) {
+                    res.invalidBeneficiaries.forEach(b => {
+                        $('#' + b.id).addClass('is-invalid');
+                    });
+                    }
+                    //toggleSubmit(false);    
+                }
+                console.log(res.messages);
+                console.log(res.valid);
+            },
+            error: function (xhr) {
+                if (xhr.status === 422) {
+                    let res = xhr.responseJSON;
+                    alert(res.messages);
+                }
+                console.error('Program validation failed');
             }
-            // Loop program options
-            $programSelect.find('option').each(function () {
-                const optionText = $(this).text().trim();
+        });
+        }
 
-                // Disable if description matches any registered description
-                if (res.registered_descriptions.includes(optionText)) {
-                    $(this).prop('disabled', true);
+        function calculateAmount()
+        {
+            let selectedProgram = $("#program_id option:selected");
+            let amountMin = parseFloat(selectedProgram.data("amount")) || 0;
+
+            let payments = parseInt($("#times").val());
+            if (!payments || payments < 1) payments = 1;
+
+            let computedAmount = amountMin * payments;
+
+            $("#amount").val(computedAmount.toFixed(2));
+
+            checkAmountWarning();
+        }
+
+        // For Data Entry, we want to load all programs (including those that may be disabled for new sales)
+        function loadMemberPrograms(memberId)
+        {
+            $.get("/entries/getMemberPrograms/" + memberId, function(data)
+            {
+                let programSelect = $("#program_id");
+                programSelect.empty();
+
+                $.each(data, function(index, program)
+                {
+                    programSelect.append(
+                        `<option value="${program.id}" 
+                            data-amount="${program.amount_min}">
+                            ${program.code}
+                        </option>`
+                    );
+                });
+
+                programSelect.trigger("chosen:updated");
+
+                // Auto trigger calculation after load
+                calculateAmount();
+            });
+        }
+
+        // For New Sales
+        function loadMemberProgramsAlt(memberId)
+        {
+            $.get("/entries/getMemberPrograms/" + memberId, function(data)
+            {
+                let programSelect = $("#program_id");
+                programSelect.empty();
+
+                $.each(data, function(index, program)
+                {
+                    programSelect.append(
+                        `<option value="${program.id}" 
+                            data-amount="${program.amount_min}">
+                            ${program.code}
+                        </option>`
+                    );
+                });
+
+                programSelect.trigger("chosen:updated");
+
+                // Auto trigger calculation after load
+                calculateAmount();
+            });
+        }
+
+        function checkAmountWarning()
+        {
+            let selectedProgram = $("#program_id option:selected");
+            let amountMin = parseFloat(selectedProgram.data("amount")) || 0;
+
+            let payments = parseInt($("#times").val());
+            if (!payments || payments < 1) payments = 1;
+
+            let expected = amountMin * payments;
+            let currentAmount = parseFloat($("#amount").val()) || 0;
+
+            if (currentAmount != expected)
+            {
+                $("#amount-warning").html(
+                    `WARNING: Expected amount is ${expected.toFixed(2)} 
+                    (${amountMin} × ${payments})`
+                );
+                $("#amount-warning").show();
+                $('#amount').addClass('is-invalid');
+            }
+            else
+            {
+                $("#amount-warning").html("");
+                $("#amount-warning").hide();
+                $('#amount').removeClass('is-invalid');
+            }
+        }
+
+        // Trigger check when user changes OR, leaves field, or types
+        $(document).on("blur", "#or_number", function () {
+            membersCheckORNumber();
+        });
+
+        const monthFromField = document.getElementById('month_from');
+
+        if(monthFromField)
+        {
+            // Month From and Month to Calculation in Data Entry
+            $("#times, #month_from").on("change keyup", function()
+            {
+                let times = parseInt($("#times").val());
+                let from  = $("#month_from").val();
+
+                if (!times || !from) return;
+
+                let date = new Date(from + "-01");
+
+                date.setMonth(date.getMonth() + (times - 1));
+
+                let yyyy = date.getFullYear();
+                let mm   = String(date.getMonth() + 1).padStart(2, '0');
+
+                let computedTo = yyyy + "-" + mm;
+
+                $("#month_to").val(computedTo);
+            });
+
+            $("#month_to").on("change", function()
+            {
+                let from = $("#month_from").val();
+                let to   = $("#month_to").val();
+
+                if (to < from)
+                {
+                    alert("To-month must be greater than or equal to From-month.");
+                    $("#month_to").val(from);
                 }
             });
 
-            // Refresh Chosen UI
-            $programSelect.trigger('chosen:updated');
-        },
-        error: function () {
-            console.error('Failed to validate member programs');
+            $("#program_id").on("change", function() {
+                calculateAmount();
+            });
+
+            $("#times").on("change keyup", function() {
+                calculateAmount();
+            });
+
+            $("#amount").on("keyup change", function() {
+                checkAmountWarning();
+            });
         }
-        });
-    });
-    }
 
+        const addBtn = document.getElementById('add-beneficiary');
 
-    $(document).ready(function () {
-
-        //Data Entry Function
-        try
+        if (addBtn) 
         {
-            if(window.location.href.includes("/entries")){
-                dateEntryMemberChanged();
-            }
-        } 
-        catch(e)
+            addBtn.addEventListener('click', () => {
+                const container = document.getElementById('beneficiaries-container');
+
+                if (!container) return;
+
+                if (container.children.length >= maxBeneficiaries) {
+                    toastr.error("Maximum number of " + maxBeneficiaries + " beneficiaries reached");
+                    return;
+                }
+
+                const templateEl = document.getElementById('beneficiary-template');
+                if (!templateEl) return;
+
+                const html = templateEl.innerHTML.replaceAll('__INDEX__', beneficiaryIndex);
+
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = html;
+
+                const fieldset = wrapper.firstElementChild;
+
+                const removeBtn = fieldset.querySelector('.beneficiary-remove-btn');
+                if (removeBtn) {
+                    removeBtn.addEventListener('click', () => {
+                        fieldset.remove();
+                        renumberBeneficiaries();
+                        validateProgram();
+                    });
+                }
+
+                container.appendChild(fieldset);
+                beneficiaryIndex++;
+                renumberBeneficiaries();
+            });
+        }
+
+        const memberId = document.getElementById('add-member_id');
+
+        if (memberId) 
         {
-            //None
+        $(document).on('change', '#member_id', function () {
+            const memberId = $(this).val();
+            const $programSelect = $('select[name="program_id"]');
+
+            // Reset first (important)
+            $programSelect.find('option').prop('disabled', false);
+
+            if (!memberId || memberId === '0') {
+                $programSelect.trigger('chosen:updated');
+                return;
+            }
+
+            $.ajax({
+            url: '/new-sales/check-member-programs',
+            type: 'POST',
+            data: {
+                member_id: memberId,
+
+
+                
+                _token: '{{ csrf_token() }}'
+            },
+            success: function (res) {
+                if (!Array.isArray(res.registered_descriptions)) {
+                    return;
+                }
+                // Loop program options
+                $programSelect.find('option').each(function () {
+                    const optionText = $(this).text().trim();
+
+                    // Disable if description matches any registered description
+                    if (res.registered_descriptions.includes(optionText)) {
+                        $(this).prop('disabled', true);
+                    }
+                });
+
+                // Refresh Chosen UI
+                $programSelect.trigger('chosen:updated');
+            },
+            error: function () {
+                console.error('Failed to validate member programs');
+            }
+            });
+        });
         }
 
-        // Check if OR Date and Birthdates are empty, if yes set default values
-        const today = formatDate(new Date());
-        const defaultBirthdate = "2000-01-01";
 
-        // OR Date = Today
-        if ($("#or_date").length && $("#or_date").val() === "") {
-            $("#or_date").val(today);
-        }
+        $(document).ready(function () {
 
-        // Member Birthdate = 2000-01-01
-        if ($("#birthdate").length && $("#birthdate").val() === "") {
-            $("#birthdate").val(defaultBirthdate);
-        }
+            //Data Entry Function
+            try
+            {
+                if(window.location.href.includes("/entries")){
+                    dateEntryMemberChanged();
+                }
+            } 
+            catch(e)
+            {
+                //None
+            }
 
-        // Claimant Birthdate = 2000-01-01
-        if ($("#birthdate_c").length && $("#birthdate_c").val() === "") {
-            $("#birthdate_c").val(defaultBirthdate);
-        }
+            // Check if OR Date and Birthdates are empty, if yes set default values
+            const today = formatDate(new Date());
+            const defaultBirthdate = "2000-01-01";
 
-        // Beneficiary Birthdate (Dynamic)
-        $(document).on("focus", "input[name*='[birthdate]']", function () {
-            if ($(this).val() === "") {
-                $(this).val(defaultBirthdate);
+            // OR Date = Today
+            if ($("#or_date").length && $("#or_date").val() === "") {
+                $("#or_date").val(today);
+            }
+
+            // Member Birthdate = 2000-01-01
+            if ($("#birthdate").length && $("#birthdate").val() === "") {
+                $("#birthdate").val(defaultBirthdate);
+            }
+
+            // Claimant Birthdate = 2000-01-01
+            if ($("#birthdate_c").length && $("#birthdate_c").val() === "") {
+                $("#birthdate_c").val(defaultBirthdate);
+            }
+
+            // Beneficiary Birthdate (Dynamic)
+            $(document).on("focus", "input[name*='[birthdate]']", function () {
+                if ($(this).val() === "") {
+                    $(this).val(defaultBirthdate);
+                }
+            });
+
+            $('#birthdate').on('blur', validateProgram);
+            $('#program_id').on('change', validateProgram);
+            $(document).on('blur', '.beneficiary-birthdate', validateProgram);
+
+            // Check First Name + Last Name combination to prevent duplicates
+            let checkTimeout = null;
+
+            // Check App No to prevent duplicates
+            $('#app_no').on('blur', function () {
+
+                const appNo  = $('#app_no').val().trim();
+                
+                // Only check when required fields are filled
+                if (!appNo) {
+                    $('#app-no-warning').hide();
+                    $('#app_no').removeClass('is-invalid');
+                    return;
+                }
+
+                // Debounce to avoid rapid firing
+                clearTimeout(checkTimeout);
+                checkTimeout = setTimeout(() => {
+
+                    $.ajax({
+                        url: "{{ route('members.checkAppNo') }}",
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            app_no: appNo
+                        },
+                        success: function (res) {
+                            if (res.exists) {
+                                $('#app-no-warning').show().text(res.message);
+                                $('#app_no').addClass('is-invalid');
+                            } else {
+                                $('#app-no-warning').hide().text("");
+                                $('#app_no').removeClass('is-invalid');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            $('#app-no-warning').hide().text("");
+                            console.error('Validation app no check failed');
+                        }
+                    });
+
+                }, 300);
+            });
+
+            $('#fname, #mname, #lname').on('blur', function () {
+
+                const firstName  = $('#fname').val().trim();
+                const middleName = $('#mname').val().trim();
+                const lastName   = $('#lname').val().trim();
+
+                // Only check when required fields are filled
+                if (!firstName || !lastName) {
+                    $('#member-warning').hide();
+                    return;
+                }
+
+                // Debounce to avoid rapid firing
+                clearTimeout(checkTimeout);
+                checkTimeout = setTimeout(() => {
+
+                    $.ajax({
+                        url: "{{ route('members.checkName') }}",
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            first_name: firstName,
+                            middle_name: middleName,
+                            last_name: lastName
+                        },
+                        success: function (res) {
+                            if (res.exists) {
+                                $('#member-warning').show().text(res.message);
+                                $('#fname, #mname, #lname').addClass('is-invalid');
+                            } else {
+                                $('#member-warning').hide().text("");
+                                $('#fname, #mname, #lname').removeClass('is-invalid');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            $('#member-warning').hide().text("");
+                            console.error('Validation check failed');
+                        }
+                    });
+
+                }, 300);
+            });
+
+            // Check Email to prevent duplicates
+            $('#email').on('blur', function () {
+
+                const email  = $('#email').val().trim();
+
+                // Only check when required fields are filled
+                if (!email) {
+                    $('#email-warning').hide();
+                    return;
+                }
+
+                // Debounce to avoid rapid firing
+                clearTimeout(checkTimeout);
+                checkTimeout = setTimeout(() => {
+
+                    $.ajax({
+                        url: "{{ route('members.checkEmail') }}",
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            email: email
+                        },
+                        success: function (res) {
+                            if (res.exists) {
+                                $('#email-warning').show().text(res.message);
+                                $('#email').addClass('is-invalid');
+                            } else {
+                                $('#email-warning').hide().text("");
+                                $('#email').removeClass('is-invalid');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            $('#email-warning').hide().text("");
+                            console.error('Validation email check failed');
+                        }
+                    });
+
+                }, 300);
+            });
+
+            const confPass = document.getElementById("confirm_password");
+
+            // If confirm_password does NOT exist, stop the script
+            if (confPass != null) {
+
+                const resetBtn = $("#resetBtn");
+
+                $("#password, #confirm_password").on("blur", function () {
+
+                    const password = document.getElementById("password").value;
+                    const confirmPassword = confPass.value;
+
+                    if (password != confirmPassword && confirmPassword !== "" && password !== "") 
+                    {
+                        toastr.options.preventDuplicates = true;
+                        toastr.error("Passwords do not match!");
+                        $('#password').removeClass('is-valid');
+                        $('#password').addClass('is-invalid');
+
+                        $('#confirm_password').removeClass('is-valid');
+                        $('#confirm_password').addClass('is-invalid');
+                        resetBtn.prop("disabled", true);
+
+                    }
+                    else if(password == "" && confirmPassword == "")
+                    {
+                        $('#password').removeClass('is-invalid is-valid');
+                        $('#confirm_password').removeClass('is-invalid is-valid');
+                        resetBtn.prop("disabled", true);
+                    }
+                    else
+                    {
+                        if(password != "" && confirmPassword == "")
+                        {
+                            $('#password').removeClass('is-invalid');
+                            $('#password').addClass('is-valid');
+                        }
+                        
+                        if(password == "" && confirmPassword != "")
+                        {
+                            $('#confirm_password').removeClass('is-invalid');
+                            $('#confirm_password').addClass('is-valid');
+                        }
+
+                        if(password != "" && confirmPassword != "" && password == confirmPassword)
+                        {
+                            $('#password').removeClass('is-invalid');
+                            $('#password').addClass('is-valid');
+                            $('#confirm_password').removeClass('is-invalid');
+                            $('#confirm_password').addClass('is-valid');
+                            resetBtn.prop("disabled", false);
+                        }
+                        
+                    }
+
+                });
+
             }
         });
 
-        $('#birthdate').on('blur', validateProgram);
-        $('#program_id').on('change', validateProgram);
-        $(document).on('blur', '.beneficiary-birthdate', validateProgram);
+    </script>
+
+    <!-- Custom scripts -->
+    <script>
+
+    // Login, Forgot Password, Register UI Toggle
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const resetBtn = $("#register");
+        const loginWrapper = document.querySelector(".login-wrapper");
+        const forgotWrapper = document.querySelector(".forgot-password-wrapper");
+        const registerWrapper = document.querySelector(".register-wrapper");
+
+        function showOnly(wrapper) {
+        loginWrapper.style.display = "none";
+        forgotWrapper.style.display = "none";
+        registerWrapper.style.display = "none";
+        wrapper.style.display = "block";
+        }
+
+        // Forgot password links
+        document.querySelectorAll(".forgot-password-link").forEach(link => {
+        link.addEventListener("click", function (e) {
+            e.preventDefault();
+            showOnly(forgotWrapper);
+        });
+        });
+
+        // Register links
+        document.querySelectorAll(".login-wrapper-footer-text a").forEach(link => {
+        link.addEventListener("click", function (e) {
+            e.preventDefault();
+            showOnly(registerWrapper);
+        });
+        });
+
+        document.querySelectorAll(".back-to-login").forEach(link => {
+            link.addEventListener("click", function (e) {
+                e.preventDefault();
+                showOnly(loginWrapper);
+            });
+        });
 
         // Check First Name + Last Name combination to prevent duplicates
         let checkTimeout = null;
 
-        // Check App No to prevent duplicates
-        $('#app_no').on('blur', function () {
-
-            const appNo  = $('#app_no').val().trim();
-            
-            // Only check when required fields are filled
-            if (!appNo) {
-                $('#app-no-warning').hide();
-                $('#app_no').removeClass('is-invalid');
-                return;
-            }
-
-            // Debounce to avoid rapid firing
-            clearTimeout(checkTimeout);
-            checkTimeout = setTimeout(() => {
-
-                $.ajax({
-                    url: "{{ route('members.checkAppNo') }}",
-                    type: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        app_no: appNo
-                    },
-                    success: function (res) {
-                        if (res.exists) {
-                            $('#app-no-warning').show().text(res.message);
-                            $('#app_no').addClass('is-invalid');
-                        } else {
-                            $('#app-no-warning').hide().text("");
-                            $('#app_no').removeClass('is-invalid');
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        $('#app-no-warning').hide().text("");
-                        console.error('Validation app no check failed');
-                    }
-                });
-
-            }, 300);
-        });
-
-        $('#fname, #mname, #lname').on('blur', function () {
-
-            const firstName  = $('#fname').val().trim();
-            const middleName = $('#mname').val().trim();
-            const lastName   = $('#lname').val().trim();
-
-            // Only check when required fields are filled
-            if (!firstName || !lastName) {
-                $('#member-warning').hide();
-                return;
-            }
-
-            // Debounce to avoid rapid firing
-            clearTimeout(checkTimeout);
-            checkTimeout = setTimeout(() => {
-
-                $.ajax({
-                    url: "{{ route('members.checkName') }}",
-                    type: "POST",
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        first_name: firstName,
-                        middle_name: middleName,
-                        last_name: lastName
-                    },
-                    success: function (res) {
-                        if (res.exists) {
-                            $('#member-warning').show().text(res.message);
-                            $('#fname, #mname, #lname').addClass('is-invalid');
-                        } else {
-                            $('#member-warning').hide().text("");
-                            $('#fname, #mname, #lname').removeClass('is-invalid');
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        $('#member-warning').hide().text("");
-                        console.error('Validation check failed');
-                    }
-                });
-
-            }, 300);
-        });
-
         // Check Email to prevent duplicates
-        $('#email').on('blur', function () {
+        $('#email_reg').on('blur', function () {
 
-            const email  = $('#email').val().trim();
+            const email  = $('#email_reg').val().trim();
 
             // Only check when required fields are filled
             if (!email) {
@@ -1173,7 +1319,7 @@
             checkTimeout = setTimeout(() => {
 
                 $.ajax({
-                    url: "{{ route('members.checkEmail') }}",
+                    url: "{{ route('users.checkEmail') }}",
                     type: "POST",
                     data: {
                         _token: "{{ csrf_token() }}",
@@ -1183,9 +1329,11 @@
                         if (res.exists) {
                             $('#email-warning').show().text(res.message);
                             $('#email').addClass('is-invalid');
+                            resetBtn.prop("disabled", true);
                         } else {
                             $('#email-warning').hide().text("");
                             $('#email').removeClass('is-invalid');
+                            resetBtn.prop("disabled", false);
                         }
                     },
                     error: function (xhr, status, error) {
@@ -1197,56 +1345,102 @@
             }, 300);
         });
 
-        const confPass = document.getElementById("confirm_password");
+        // Check Contact Number to prevent duplicates
+        $('#contact_num_register').on('blur', function () {
+
+            const contactNum = $('#contact_num_register').val().trim();
+
+            // Only check when required fields are filled
+            if (!contactNum) {
+                $('#contact-num-warning').hide();
+                return;
+            }
+
+            // Debounce to avoid rapid firing
+            clearTimeout(checkTimeout);
+            checkTimeout = setTimeout(() => {
+
+                $.ajax({
+                    url: "{{ route('users.checkContactNum') }}",
+                    type: "POST",
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        contact_num: contactNum
+                    },
+                    success: function (res) {
+                        if (res.exists) {
+                            $('#contact-num-warning').show().text(res.message);
+                            $('#contact_num_register').addClass('is-invalid');
+                            resetBtn.prop("disabled", true);
+                        } else {
+                            $('#contact-num-warning').hide().text("");
+                            $('#contact_num_register').removeClass('is-invalid');
+                            resetBtn.prop("disabled", false);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        $('#contact-num-warning').hide().text("");
+                        console.error('Validation contact number check failed');
+                    }
+                });
+
+            }, 300);
+        });
+
+
+        const confPass = document.getElementById("confirm_password_reg");
 
         // If confirm_password does NOT exist, stop the script
         if (confPass != null) {
 
-            const resetBtn = $("#resetBtn");
+            $("#password_reg, #confirm_password_reg").on("blur", function () {
 
-            $("#password, #confirm_password").on("blur", function () {
-
-                const password = document.getElementById("password").value;
+                const password = document.getElementById("password_reg").value;
                 const confirmPassword = confPass.value;
+
+                $('#password-warning').hide();
 
                 if (password != confirmPassword && confirmPassword !== "" && password !== "") 
                 {
-                    toastr.options.preventDuplicates = true;
-                    toastr.error("Passwords do not match!");
-                    $('#password').removeClass('is-valid');
-                    $('#password').addClass('is-invalid');
+                    $('#password-warning').show().text("Password do not match");
+                    $('#password_reg').removeClass('is-valid');
+                    $('#password_reg').addClass('is-invalid');
 
-                    $('#confirm_password').removeClass('is-valid');
-                    $('#confirm_password').addClass('is-invalid');
+                    $('#confirm_password_reg').removeClass('is-valid');
+                    $('#confirm_password_reg').addClass('is-invalid');
                     resetBtn.prop("disabled", true);
 
                 }
                 else if(password == "" && confirmPassword == "")
                 {
-                    $('#password').removeClass('is-invalid is-valid');
-                    $('#confirm_password').removeClass('is-invalid is-valid');
+                    $('#password_reg').removeClass('is-invalid is-valid');
+                    $('#confirm_password_reg').removeClass('is-invalid is-valid');
                     resetBtn.prop("disabled", true);
                 }
                 else
                 {
                     if(password != "" && confirmPassword == "")
                     {
-                        $('#password').removeClass('is-invalid');
-                        $('#password').addClass('is-valid');
+                        $('#password-warning').show().text("Password do not match");
+                        $('#password_reg').removeClass('is-invalid');
+                        $('#password_reg').addClass('is-valid');
+                        resetBtn.prop("disabled", true);
                     }
                     
                     if(password == "" && confirmPassword != "")
                     {
-                        $('#confirm_password').removeClass('is-invalid');
-                        $('#confirm_password').addClass('is-valid');
+                        $('#password-warning').show().text("Password do not match");
+                        $('#confirm_password_reg').removeClass('is-invalid');
+                        $('#confirm_password_reg').addClass('is-valid');
+                        resetBtn.prop("disabled", true);
                     }
 
                     if(password != "" && confirmPassword != "" && password == confirmPassword)
                     {
-                        $('#password').removeClass('is-invalid');
-                        $('#password').addClass('is-valid');
-                        $('#confirm_password').removeClass('is-invalid');
-                        $('#confirm_password').addClass('is-valid');
+                        $('#password_reg').removeClass('is-invalid');
+                        $('#password_reg').addClass('is-valid');
+                        $('#confirm_password_reg').removeClass('is-invalid');
+                        $('#confirm_password_reg').addClass('is-valid');
                         resetBtn.prop("disabled", false);
                     }
                     
@@ -1255,201 +1449,33 @@
             });
 
         }
+
     });
 
-</script>
+    </script>
 
-<!-- Custom scripts -->
-<script>
+    <!-- Report Generation Script -->
+    <script>
+        $(document).ready(function() {
+           if(window.location.href.includes("/reports")){
 
-  // Login, Forgot Password, Register UI Toggle
-  document.addEventListener("DOMContentLoaded", function () {
+                $('#weekInput').hide();
+                $('#monthInput').hide();
 
-    const resetBtn = $("#register");
-    const loginWrapper = document.querySelector(".login-wrapper");
-    const forgotWrapper = document.querySelector(".forgot-password-wrapper");
-    const registerWrapper = document.querySelector(".register-wrapper");
+                $('#reportType').on('change', function() {
+                    const selectedType = $(this).val();
+                    $('#dateInput').hide();
+                    $('#weekInput').hide();
+                    $('#monthInput').hide();
 
-    function showOnly(wrapper) {
-      loginWrapper.style.display = "none";
-      forgotWrapper.style.display = "none";
-      registerWrapper.style.display = "none";
-      wrapper.style.display = "block";
-    }
-
-    // Forgot password links
-    document.querySelectorAll(".forgot-password-link").forEach(link => {
-      link.addEventListener("click", function (e) {
-        e.preventDefault();
-        showOnly(forgotWrapper);
-      });
-    });
-
-    // Register links
-    document.querySelectorAll(".login-wrapper-footer-text a").forEach(link => {
-      link.addEventListener("click", function (e) {
-        e.preventDefault();
-        showOnly(registerWrapper);
-      });
-    });
-
-    document.querySelectorAll(".back-to-login").forEach(link => {
-        link.addEventListener("click", function (e) {
-            e.preventDefault();
-            showOnly(loginWrapper);
-        });
-    });
-
-    // Check First Name + Last Name combination to prevent duplicates
-    let checkTimeout = null;
-
-    // Check Email to prevent duplicates
-    $('#email_reg').on('blur', function () {
-
-        const email  = $('#email_reg').val().trim();
-
-        // Only check when required fields are filled
-        if (!email) {
-            $('#email-warning').hide();
-            return;
-        }
-
-        // Debounce to avoid rapid firing
-        clearTimeout(checkTimeout);
-        checkTimeout = setTimeout(() => {
-
-            $.ajax({
-                url: "{{ route('users.checkEmail') }}",
-                type: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    email: email
-                },
-                success: function (res) {
-                    if (res.exists) {
-                        $('#email-warning').show().text(res.message);
-                        $('#email').addClass('is-invalid');
-                        resetBtn.prop("disabled", true);
-                    } else {
-                        $('#email-warning').hide().text("");
-                        $('#email').removeClass('is-invalid');
-                        resetBtn.prop("disabled", false);
+                    if (selectedType === 'daily') {
+                        $('#dateInput').show();
+                    } else if (selectedType === 'weekly') {
+                        $('#weekInput').show();
+                    } else if (selectedType === 'monthly') {
+                        $('#monthInput').show();
                     }
-                },
-                error: function (xhr, status, error) {
-                    $('#email-warning').hide().text("");
-                    console.error('Validation email check failed');
-                }
-            });
-
-        }, 300);
-    });
-
-    // Check Contact Number to prevent duplicates
-    $('#contact_num_register').on('blur', function () {
-
-        const contactNum = $('#contact_num_register').val().trim();
-
-        // Only check when required fields are filled
-        if (!contactNum) {
-            $('#contact-num-warning').hide();
-            return;
-        }
-
-        // Debounce to avoid rapid firing
-        clearTimeout(checkTimeout);
-        checkTimeout = setTimeout(() => {
-
-            $.ajax({
-                url: "{{ route('users.checkContactNum') }}",
-                type: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    contact_num: contactNum
-                },
-                success: function (res) {
-                    if (res.exists) {
-                        $('#contact-num-warning').show().text(res.message);
-                        $('#contact_num_register').addClass('is-invalid');
-                        resetBtn.prop("disabled", true);
-                    } else {
-                        $('#contact-num-warning').hide().text("");
-                        $('#contact_num_register').removeClass('is-invalid');
-                        resetBtn.prop("disabled", false);
-                    }
-                },
-                error: function (xhr, status, error) {
-                    $('#contact-num-warning').hide().text("");
-                    console.error('Validation contact number check failed');
-                }
-            });
-
-        }, 300);
-    });
-
-
-    const confPass = document.getElementById("confirm_password_reg");
-
-    // If confirm_password does NOT exist, stop the script
-    if (confPass != null) {
-
-        $("#password_reg, #confirm_password_reg").on("blur", function () {
-
-            const password = document.getElementById("password_reg").value;
-            const confirmPassword = confPass.value;
-
-            $('#password-warning').hide();
-
-            if (password != confirmPassword && confirmPassword !== "" && password !== "") 
-            {
-                $('#password-warning').show().text("Password do not match");
-                $('#password_reg').removeClass('is-valid');
-                $('#password_reg').addClass('is-invalid');
-
-                $('#confirm_password_reg').removeClass('is-valid');
-                $('#confirm_password_reg').addClass('is-invalid');
-                resetBtn.prop("disabled", true);
-
+                });
             }
-            else if(password == "" && confirmPassword == "")
-            {
-                $('#password_reg').removeClass('is-invalid is-valid');
-                $('#confirm_password_reg').removeClass('is-invalid is-valid');
-                resetBtn.prop("disabled", true);
-            }
-            else
-            {
-                if(password != "" && confirmPassword == "")
-                {
-                    $('#password-warning').show().text("Password do not match");
-                    $('#password_reg').removeClass('is-invalid');
-                    $('#password_reg').addClass('is-valid');
-                    resetBtn.prop("disabled", true);
-                }
-                
-                if(password == "" && confirmPassword != "")
-                {
-                    $('#password-warning').show().text("Password do not match");
-                    $('#confirm_password_reg').removeClass('is-invalid');
-                    $('#confirm_password_reg').addClass('is-valid');
-                    resetBtn.prop("disabled", true);
-                }
-
-                if(password != "" && confirmPassword != "" && password == confirmPassword)
-                {
-                    $('#password_reg').removeClass('is-invalid');
-                    $('#password_reg').addClass('is-valid');
-                    $('#confirm_password_reg').removeClass('is-invalid');
-                    $('#confirm_password_reg').addClass('is-valid');
-                    resetBtn.prop("disabled", false);
-                }
-                
-            }
-
         });
-
-    }
-
-  });
-
-</script>
+    </script>

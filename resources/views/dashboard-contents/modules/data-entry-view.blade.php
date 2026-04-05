@@ -1,6 +1,6 @@
 <div class="card-header">
     <h3 class="card-title" style="padding-top: 10px;">View Entry Details</h3>
-    <button class="btn btn-secondary float-right" style="color: white;" onclick="hideForm()">
+    <button class="btn btn-secondary float-right" style="color: white;" onclick="dataEntryHideForm()">
         <span class="fas fa-times"></span> Close
     </button>
 </div>
@@ -61,8 +61,7 @@
             <div class="row">
                 <div class="form-group col">
                     <label for="incentive">Incentive 1-50 (%):</label>
-                    <input type="number" class="form-control" id="incentive" name="incentive"
-                     onkeyup="enforceMinMax(this)" min="1" max="50" value="{{ $entries->incentives; }}" disabled>
+                    <input type="number" class="form-control" id="incentive" name="incentive" value="{{ $entries->incentives; }}" disabled>
                 </div>
                 <div class="form-group col">
                     <label for="remarks">Remarks:</label>
@@ -73,6 +72,6 @@
 
     </div>
     <div class="card-footer">
-        <button type="button" class="btn btn-secondary" style="margin-left: 10px;" onclick="hideForm()">Close</button>
+        <button type="button" class="btn btn-secondary" style="margin-left: 10px;" onclick="dataEntryHideForm()">Close</button>
     </div>
 </form>

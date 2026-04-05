@@ -14,7 +14,11 @@ use Illuminate\Support\Facades\Artisan;
 class BranchController extends Controller
 {
 
-    public function index(){
+    /**
+     *  Defeault Page for Branch Module
+     */
+    public function index()
+    {
         if(auth()->check()){
 
             $my_user = auth()->user();
@@ -32,7 +36,11 @@ class BranchController extends Controller
         }
     }
 
-    public function store(Request $request){
+    /**
+     *  Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
         if(auth()->check()){
 
             // Get Request Data
@@ -64,7 +72,12 @@ class BranchController extends Controller
         }
     }
 
-    public function update(Request $request, $id){
+
+    /**
+     *  Update the specified resource in storage.
+     */
+    public function update(Request $request, $id)
+    {
         if(auth()->check()){
 
             // Get Request Data
@@ -97,7 +110,11 @@ class BranchController extends Controller
         }
     }
 
-    public function destroy(Request $request){
+    /**
+     *  Remove the specified resource from storage.
+     */
+    public function destroy(Request $request)
+    {
         if(auth()->check()){
 
             // Destroy Request Data

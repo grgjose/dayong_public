@@ -12,8 +12,13 @@ use Illuminate\Support\Facades\Artisan;
 
 class AuditController extends Controller
 {
-    
-    public function index(){
+
+
+    /**
+     *  Defeault Page for Audit Module
+     */
+    public function index()
+    {
         if(auth()->check()){
 
             $my_user = auth()->user();
@@ -35,16 +40,16 @@ class AuditController extends Controller
         }
     }
 
-    public function store(Request $request){
-
+    public function store(Request $request)
+    {
     }
 
-    public function update(Request $request){
-        
+    public function update(Request $request)
+    {    
     }
 
-    public function destroy(Request $request){
-        
+    public function destroy(Request $request)
+    {    
     }
 
 }

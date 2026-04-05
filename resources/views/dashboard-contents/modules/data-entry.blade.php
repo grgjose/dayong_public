@@ -1,4 +1,4 @@
-<!-- Main content -->
+<!-- MAIN CONTENT -->
 <section class="content">
 	<div class="container-fluid">
 		<div class="row">
@@ -38,6 +38,7 @@
 									<th>Agent</th>
 									<th>Member</th>
 									<th>OR</th>
+									<th>OR Date</th>
 									<th>Amount</th>
 									<th>NOP</th>
 									<th>Program</th>
@@ -81,6 +82,7 @@
 										</td>
 
 										<td>{{ $entry->or_number; }}</td>
+										<td>{{ date('Y-m-d', strtotime($entry->or_date)) }}</td>
 										<td>{{ $entry->amount; }}</td>
 										<td>{{ $entry->number_of_payment; }}</td>
 
@@ -101,7 +103,7 @@
 											<button class="btn btn-outline-info class-with-tooltip"
 												data-toggle="modal"
 												data-target="#ViewModal"
-												onclick="dateEntryViewFunction({{ $entry->id; }})"
+												onclick="dataEntryViewFunction({{ $entry->id; }})"
 												data-title="View Details">
 												<span class="fas fa-eye"></span>
 											</button>
@@ -110,7 +112,7 @@
 												<button class="btn btn-outline-primary"
 													data-toggle="modal"
 													data-target="#EditModal"
-													onclick="dateEntryEditFunction({{ $entry->id; }})"
+													onclick="dataEntryEditFunction({{ $entry->id; }})"
 													data-title="Edit Details">
 													<span class="fas fa-pen"></span>
 												</button>
@@ -118,7 +120,7 @@
 												<button class="btn btn-outline-danger"
 													data-toggle="modal"
 													data-target="#DeleteModal"
-													onclick="dateEntryDeleteFunction({{ $entry->id; }})"
+													onclick="dataEntryDeleteFunction({{ $entry->id; }})"
 													data-title="Delete">
 													<span class="fas fa-trash"></span>
 												</button>
@@ -127,7 +129,7 @@
 											<button class="btn btn-outline-success"
 												data-toggle="modal"
 												data-target="#RemitModal"
-												onclick="pushRemittance({{ $entry->id; }})"
+												onclick="dataEntryPushRemittance({{ $entry->id; }})"
 												data-title="Remit">
 												<span class="fas fa-money-bill-wave-alt"></span>
 											</button>
@@ -138,7 +140,6 @@
 						</table>
 					</div>
 				</div>
-
 
 				<!-- ADD ENTRY SECTION -->
 				<div class="card card-primary" id="form" style="display: none;">
@@ -299,7 +300,7 @@
 	</div>
 </section>
 
-<!-- Import Modal -->
+<!-- IMPORT MODAL -->
 <div class="modal fade" id="ImportModal" tabindex="-1" role="dialog" aria-labelledby="ImportModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">

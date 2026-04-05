@@ -41,6 +41,9 @@ class ReportController extends Controller
         $validated = $request->validate([
             "type" => ['required'],
             "branch" => ['required'],
+            "date" => ['nullable'],
+            "week" => ['nullable'],
+            "month" => ['nullable'],
         ]);
 
         $my_user = auth()->user();
@@ -57,18 +60,17 @@ class ReportController extends Controller
             }
         }
 
-        if($validated["type"] == "daily"){
+        if($validated["type"] == "daily")
+        {
 
             // New Sales
-            $new_sales = DB::table('members')->where('created_at', '<', date('Y-m-d'));
+            $new_sales = DB::table('members')->where('created_at', '<', date('Y-m-d', $validated['date']))->get();
 
             // Collection
-            $collection = DB::table('entries')->where('created_at', '<', date('Y-m-d'));
+            $collection = DB::table('entries')->where('created_at', '<', date('Y-m-d', $validated['date']))->get();
 
-
-            
             $results_col = DB::table('users')
-            ->join('entries', 'users.id', '=', 'entries.marketting_agent')
+            ->join('entries', 'users.id', '=', 'entries.agent_id')
             ->join('members', 'entries.member_id', '=', 'members.id')
             ->select([
                 'users.lname as user_name',
@@ -79,6 +81,7 @@ class ReportController extends Controller
                 DB::raw('SUM(entries.fidelity_total) as total_fidelity'),
                 DB::raw('MIN(entries.created_at) as created_at')
             ])
+            ->where('entries.created_at', '<', date('Y-m-d', $validated['date']))
             ->groupBy('users.id', 'users.lname')
             ->get();
     
@@ -94,16 +97,17 @@ class ReportController extends Controller
                 DB::raw('SUM(members_program.fidelity_total) as total_fidelity'),
                 DB::raw('MIN(members_program.created_at) as created_at')
             ])
+            ->where('members_program.created_at', '<', date('Y-m-d', $validated['date']))
             ->groupBy('users.id', 'users.lname')
             ->get();
 
-            $filename = 'daily_report_'. date('m_d_Y') .'.pdf';
+            $filename = 'daily_report_'. date('m_d_Y', $validated['date']) .'.pdf';
 
             $pdf = Pdf::loadView('forms.daily_report', [
                 'branches' => $branches,
                 'users' => $users,
-                'monthAndYear' => date('F Y'),
-                'date' => date('m/d/Y'),
+                'monthAndYear' => date('F Y', $validated['date']),
+                'date' => date('m/d/Y', $validated['date']),
                 'branch' => $name,
                 'cashier' => $my_user->lname.' '.$my_user->fname,
                 'results_col' => $results_col,
@@ -115,24 +119,33 @@ class ReportController extends Controller
             $content = $pdf->download()->getOriginalContent();
             Storage::put('public/daily/'.$filename,$content);
 
-        } else if($validated["type"] == "weekly"){
-
-            
-        } else if($validated["type"] == "monthly"){
-
+        } 
+        
+        else if($validated["type"] == "weekly")
+        {
+            // Get Start and End Date of the Week
+        } 
+        
+        else if($validated["type"] == "monthly")
+        {
+            // Get Start and End Date of the Month
         }
 
         return $pdf->download($filename);
     }
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
+        // Nothing Yet
     }
 
-    public function update(Request $request){
-        
+    public function update(Request $request)
+    {
+        // Nothing Yet
     }
 
-    public function destroy(Request $request){
-        
+    public function destroy(Request $request)
+    {
+        // Nothing Yet    
     }
 }

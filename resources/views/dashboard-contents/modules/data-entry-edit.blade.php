@@ -1,6 +1,6 @@
 <div class="card-header">
     <h3 class="card-title" style="padding-top: 10px;">Edit Entry Details</h3>
-    <button class="btn btn-secondary float-right" style="color: white;" onclick="hideForm()">
+    <button class="btn btn-secondary float-right" style="color: white;" onclick="dataEntryHideForm()">
         <span class="fas fa-times"></span> Close
     </button>
 </div>
@@ -11,15 +11,13 @@
             <div class="row">
                 <div class="form-group col">
                     <label for="branch_id">Branch:</label>
-                    <select class="form-control chosen-select" id="branch_id" name="branch_id" value="{{ $branch->id; }}">
-                        @foreach($branches as $b)
-                            <option value="{{ $b->id; }}">{{ $b->branch; }}</option>
-                        @endforeach
+                    <select class="form-control chosen-select" id="branch_id" name="branch_id" disabled>
+                        <option value="{{ $branches->id; }}">{{ $branches->branch; }}</option>
                     </select>
                 </div>
                 <div class="form-group col">
                     <label for="member_id">Agent:</label>
-                    <select class="form-control chosen-select" id="marketting_agent" name="marketting_agent" value="{{ $agent->id; }}">
+                    <select class="form-control chosen-select" id="agent_id" name="agent_id" value="{{ $agent->id; }}">
                         @foreach($users as $u)
                             <option value="{{ $u->id; }}">{{ $u->fname.' '.$u->mname.' '.$u->lname; }}</option>
                         @endforeach
@@ -64,9 +62,8 @@
             </div> <br>
             <div class="row">
                 <div class="form-group col">
-                    <label for="incentive">Incentive 1-50 (%):</label>
-                    <input type="number" class="form-control" id="incentive" name="incentive"
-                     onkeyup="enforceMinMax(this)" min="1" max="50" value="{{ $entries->incentives; }}">
+                    <label for="incentive">Incentive:</label>
+                    <input type="number" class="form-control" id="incentive" name="incentive" value="{{ $entries->incentives; }}">
                 </div>
                 <div class="form-group col">
                     <label for="remarks">Remarks:</label>
@@ -77,6 +74,6 @@
 
     </div>
     <div class="card-footer">
-        <button type="button" class="btn btn-secondary" style="margin-left: 10px;" onclick="hideForm()">Close</button>
+        <button type="button" class="btn btn-secondary" style="margin-left: 10px;" onclick="dataEntryHideForm()">Close</button>
     </div>
 </form>

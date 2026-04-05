@@ -534,14 +534,14 @@ class EntryController extends Controller
         if(auth()->check()){
             $my_user = auth()->user();
             $entries = DB::table('entries')->where('id', $id)->get();
-            $agent = DB::table('users')->where('id', $entries[0]->marketting_agent)->get();
+            $agent = DB::table('users')->where('id', $entries[0]->agent_id)->get();
             $member = DB::table('members')->where('id', $entries[0]->member_id)->get();
             $branch = DB::table('branches')->where('id', $entries[0]->branch_id)->get();
             $program = DB::table('programs')->where('id', $entries[0]->program_id)->get();
 
             $users = DB::table('users')->get();
-            $branches = DB::table('branches')->get();
-            $programs = DB::table('programs')->get();
+            $branches = DB::table('branches')->where('id', $entries[0]->branch_id)->get();
+            $programs = DB::table('programs')->where('id', $entries[0]->program_id)->get();
 
             return view('dashboard-contents.modules.data-entry-edit', [
                 'id' => $id,
@@ -550,8 +550,8 @@ class EntryController extends Controller
                 'member' => $member[0],
                 'branch' => $branch[0],
                 'program' => $program[0],
-                'branches' => $branches,
-                'programs' => $programs,
+                'branches' => $branches[0],
+                'programs' => $programs[0],
                 'users' => $users
             ]);
 

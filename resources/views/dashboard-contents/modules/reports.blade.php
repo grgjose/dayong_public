@@ -17,7 +17,7 @@
                         <div class="row"> 
                             <div class="form-group col">
                                 <label class="form-label">Type of Report</label>
-                                <select class="form-select chosen-select" name="type">
+                                <select class="form-select chosen-select" id="reportType" name="type">
                                     <option value="daily">Daily Report</option>
                                     <option value="weekly">Weekly Report</option>
                                     <option value="monthly">Monthly Report</option>
@@ -31,16 +31,27 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="form-group col">
-                                <label>Date From:</label>
-                                <input type="date" name="date_from" class="form-control">
+                            <!-- Daily Report Date Input -->
+                            <div class="form-group col" id="dateInput">
+                                <label class="form-label">Date:</label>
+                                <input type="date" name="date" class="form-control">
                             </div>
-                            <div class="form-group col">
-                                <label>Date To:</label>
-                                <input type="date" name="date_to" class="form-control">
+
+                            <!-- Weekly Report Week Input -->
+                            <div class="form-group col" id="weekInput">
+                                <label class="form-label">Week:</label>
+                                <input type="week" name="week" class="form-control">
+                            </div> 
+
+                            <!-- Monthly Report Month Input -->
+                            <div class="form-group col" id="monthInput">
+                                <label class="form-label">Month:</label>
+                                <input type="month" name="month" class="form-control">
                             </div>
-                            <div class="form-group col pt-1 pl-4">
-                                <input type="submit" class="btn btn-info mt-4" value="Generate Report" />
+                            
+                            <!-- Generate Button -->
+                            <div class="form-group col d-flex align-items-end">
+                                <input type="submit" class="btn btn-outline-info" value="Generate Report" />
                             </div>
                             <br> <br>
                         </div>

@@ -23,7 +23,8 @@ use Illuminate\Support\Facades\Artisan;
 class FidelityController extends Controller
 {
 
-    public function index(){
+    public function index()
+    {
         if(auth()->check()){
 
             $my_user = auth()->user();
@@ -49,7 +50,8 @@ class FidelityController extends Controller
         }
     }
 
-    public function register(Request $request){
+    public function register(Request $request)
+    {
 
         if(auth()->check()){
 
@@ -71,7 +73,8 @@ class FidelityController extends Controller
         }
     }
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
 
         if(auth()->check()){
 

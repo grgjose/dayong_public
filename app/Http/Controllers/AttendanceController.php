@@ -15,7 +15,11 @@ use Illuminate\Support\Facades\Artisan;
 class AttendanceController extends Controller
 {
 
-    public function index(){
+    /**
+     * Defeault Page for Attendance Module
+     */
+    public function index()
+    {
         if(auth()->check()){
 
             $my_user = auth()->user();
@@ -39,7 +43,11 @@ class AttendanceController extends Controller
         }
     }
 
-    public function store(Request $request){
+    /**
+     * Inserts Attendance Record (Time In)
+     */
+    public function store(Request $request)
+    {
         if(auth()->check()){
 
             $my_user = auth()->user();
@@ -60,7 +68,11 @@ class AttendanceController extends Controller
         }
     }
 
-    public function update(Request $request, $id){
+    /**
+     * Updates Attendance Record (Time Out)
+     */
+    public function update(Request $request, $id)
+    {
         if(auth()->check()){
 
             $my_user = auth()->user();
@@ -79,7 +91,11 @@ class AttendanceController extends Controller
         }
     }
 
-    public function destroy(Request $request){
+    /**
+     * Deletes Attendance Record
+     */
+    public function destroy(Request $request)
+    {
         if(auth()->check()){
 
             // Destroy Request Data

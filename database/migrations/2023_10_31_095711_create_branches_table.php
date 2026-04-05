@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string("branch")->nullable();
             $table->string("address")->nullable();
             $table->string("description")->nullable();
-            $table->boolean("is_active")->default(true);
+            $table->string("status")->default('active')->nullable();
             $table->boolean("is_deleted")->default(false);
             $table->timestamps();
         });

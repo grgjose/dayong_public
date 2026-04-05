@@ -502,44 +502,6 @@ class ExcelCollectionController extends Controller
             return null;
         }
     }
-
-    /*
-    public function mySQLDateTimeToExcel($mysqlDateTime)
-    {
-        // Validate the input format
-        if (empty($mysqlDateTime) || !strtotime($mysqlDateTime)) {
-            return null;  // Return null if the input is invalid
-        }
-    
-        // Check if the input contains time (T separator)
-        if (strpos($mysqlDateTime, 'T') !== false) {
-            // Convert MySQL datetime string to Unix timestamp
-            $timestamp = strtotime($mysqlDateTime);
-        } else {
-            // If no time, add a default time to the date (00:00:00) for calculation
-            $mysqlDateTime .= 'T00:00:00';
-            $timestamp = strtotime($mysqlDateTime);
-        }
-    
-        // Excel's epoch start is 1900-01-01 00:00:00
-        $excelEpoch = strtotime('1900-01-01 00:00:00');
-    
-        // Check for potential errors with strtotime
-        if ($timestamp === false || $excelEpoch === false) {
-            return null;  // Return null in case of error during strtotime
-        }
-    
-        // Calculate the difference in seconds
-        $diffInSeconds = $timestamp - $excelEpoch;
-    
-        // Convert to Excel date (days from 1900-01-01), divide by 86400 (seconds in a day)
-        // Excel date system uses a "day" starting at 1900-01-01 00:00:00
-        $excelDate = $diffInSeconds / 86400; // 86400 is the number of seconds in a day
-    
-        // Return the result with high precision (up to 9 decimal places)
-        return round($excelDate, 9); 
-    }
-    */
     
     public function mySQLDateTimeToExcel($mysqlDateTime)
     {
