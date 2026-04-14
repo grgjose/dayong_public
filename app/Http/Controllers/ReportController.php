@@ -64,10 +64,10 @@ class ReportController extends Controller
         {
 
             // New Sales
-            $new_sales = DB::table('members')->where('created_at', '<', date('Y-m-d', $validated['date']))->get();
+            $new_sales = DB::table('members')->where('created_at', '=', date('Y-m-d', strtotime($validated['date'])))->get();
 
             // Collection
-            $collection = DB::table('entries')->where('created_at', '<', date('Y-m-d', $validated['date']))->get();
+            $collection = DB::table('entries')->where('created_at', '=', date('Y-m-d', strtotime($validated['date'])))->get();
 
             $results_col = DB::table('users')
             ->join('entries', 'users.id', '=', 'entries.agent_id')
@@ -81,7 +81,7 @@ class ReportController extends Controller
                 DB::raw('SUM(entries.fidelity_total) as total_fidelity'),
                 DB::raw('MIN(entries.created_at) as created_at')
             ])
-            ->where('entries.created_at', '<', date('Y-m-d', $validated['date']))
+            ->where('entries.created_at', '=', date('Y-m-d', strtotime($validated['date'])))
             ->groupBy('users.id', 'users.lname')
             ->get();
     
@@ -97,17 +97,17 @@ class ReportController extends Controller
                 DB::raw('SUM(members_program.fidelity_total) as total_fidelity'),
                 DB::raw('MIN(members_program.created_at) as created_at')
             ])
-            ->where('members_program.created_at', '<', date('Y-m-d', $validated['date']))
+            ->where('members_program.created_at', '=', date('Y-m-d', strtotime($validated['date'])))
             ->groupBy('users.id', 'users.lname')
             ->get();
 
-            $filename = 'daily_report_'. date('m_d_Y', $validated['date']) .'.pdf';
+            $filename = 'daily_report_'. date('m_d_Y',  strtotime($validated['date'])) .'.pdf';
 
             $pdf = Pdf::loadView('forms.daily_report', [
                 'branches' => $branches,
                 'users' => $users,
-                'monthAndYear' => date('F Y', $validated['date']),
-                'date' => date('m/d/Y', $validated['date']),
+                'monthAndYear' => date('F Y', strtotime($validated['date'])),
+                'date' => date('m/d/Y', strtotime($validated['date'])),
                 'branch' => $name,
                 'cashier' => $my_user->lname.' '.$my_user->fname,
                 'results_col' => $results_col,
@@ -123,12 +123,123 @@ class ReportController extends Controller
         
         else if($validated["type"] == "weekly")
         {
-            // Get Start and End Date of the Week
-        } 
-        
+            // Parse "2025-W03" into a DateTime, then get Monday and Sunday of that week
+            $weekDate = new \DateTime();
+            // explode into year and week number
+            [$year, $week] = explode('-W', $validated['week']);
+            $weekDate->setISODate((int)$year, (int)$week, 1); // 1 = Monday
+            $startDate = $weekDate->format('Y-m-d');
+            $weekDate->modify('+6 days'); // Sunday
+            $endDate = $weekDate->format('Y-m-d');
+
+            $results_col = DB::table('users')
+                ->join('entries', 'users.id', '=', 'entries.agent_id')
+                ->join('members', 'entries.member_id', '=', 'members.id')
+                ->select([
+                    'users.lname as user_name',
+                    DB::raw('COUNT(DISTINCT members.fname) as number_of_accounts'),
+                    DB::raw('SUM(entries.amount) as total_amount'),
+                    DB::raw('SUM(entries.incentives_total) as total_incentives'),
+                    DB::raw('SUM(entries.net) as total_net'),
+                    DB::raw('SUM(entries.fidelity_total) as total_fidelity'),
+                    DB::raw('MIN(entries.created_at) as created_at')
+                ])
+                ->whereBetween('entries.created_at', [$startDate, $endDate])
+                ->groupBy('users.id', 'users.lname')
+                ->get();
+
+            $results_ns = DB::table('users')
+                ->join('members_program', 'users.id', '=', 'members_program.agent_id')
+                ->join('members', 'members_program.member_id', '=', 'members.id')
+                ->select([
+                    'users.lname as user_name',
+                    DB::raw('COUNT(DISTINCT members.fname) as number_of_accounts'),
+                    DB::raw('SUM(members_program.amount) as total_amount'),
+                    DB::raw('SUM(members_program.incentives_total) as total_incentives'),
+                    DB::raw('SUM(members_program.net) as total_net'),
+                    DB::raw('SUM(members_program.fidelity_total) as total_fidelity'),
+                    DB::raw('MIN(members_program.created_at) as created_at')
+                ])
+                ->whereBetween('members_program.created_at', [$startDate, $endDate])
+                ->groupBy('users.id', 'users.lname')
+                ->get();
+
+            $filename = 'weekly_report_' . str_replace('-', '_', $validated['week']) . '.pdf';
+
+            $pdf = Pdf::loadView('forms.weekly_report', [
+                'branches'    => $branches,
+                'users'       => $users,
+                'startDate'   => date('m/d/Y', strtotime($startDate)),
+                'endDate'     => date('m/d/Y', strtotime($endDate)),
+                'branch'      => $name,
+                'cashier'     => $my_user->lname . ' ' . $my_user->fname,
+                'results_col' => $results_col,
+                'results_ns'  => $results_ns,
+                'ns_result'   => array(),
+                'col_result'  => array(),
+            ]);
+
+            $content = $pdf->download()->getOriginalContent();
+            Storage::put('public/weekly/' . $filename, $content);
+        }
+
         else if($validated["type"] == "monthly")
         {
-            // Get Start and End Date of the Month
+            // Parse "2025-01" into first and last day of that month
+            $monthDate = \DateTime::createFromFormat('Y-m', $validated['month']);
+            $startDate  = $monthDate->format('Y-m-01');
+            $endDate    = $monthDate->format('Y-m-t'); // 't' = last day of month
+
+            $results_col = DB::table('users')
+                ->join('entries', 'users.id', '=', 'entries.agent_id')
+                ->join('members', 'entries.member_id', '=', 'members.id')
+                ->select([
+                    'users.lname as user_name',
+                    DB::raw('COUNT(DISTINCT members.fname) as number_of_accounts'),
+                    DB::raw('SUM(entries.amount) as total_amount'),
+                    DB::raw('SUM(entries.incentives_total) as total_incentives'),
+                    DB::raw('SUM(entries.net) as total_net'),
+                    DB::raw('SUM(entries.fidelity_total) as total_fidelity'),
+                    DB::raw('MIN(entries.created_at) as created_at')
+                ])
+                ->whereBetween('entries.created_at', [$startDate, $endDate])
+                ->groupBy('users.id', 'users.lname')
+                ->get();
+
+            $results_ns = DB::table('users')
+                ->join('members_program', 'users.id', '=', 'members_program.agent_id')
+                ->join('members', 'members_program.member_id', '=', 'members.id')
+                ->select([
+                    'users.lname as user_name',
+                    DB::raw('COUNT(DISTINCT members.fname) as number_of_accounts'),
+                    DB::raw('SUM(members_program.amount) as total_amount'),
+                    DB::raw('SUM(members_program.incentives_total) as total_incentives'),
+                    DB::raw('SUM(members_program.net) as total_net'),
+                    DB::raw('SUM(members_program.fidelity_total) as total_fidelity'),
+                    DB::raw('MIN(members_program.created_at) as created_at')
+                ])
+                ->whereBetween('members_program.created_at', [$startDate, $endDate])
+                ->groupBy('users.id', 'users.lname')
+                ->get();
+
+            $filename = 'monthly_report_' . $monthDate->format('m_Y') . '.pdf';
+
+            $pdf = Pdf::loadView('forms.monthly_report', [
+                'branches'      => $branches,
+                'users'         => $users,
+                'monthAndYear'  => $monthDate->format('F Y'),
+                'startDate'     => date('m/d/Y', strtotime($startDate)),
+                'endDate'       => date('m/d/Y', strtotime($endDate)),
+                'branch'        => $name,
+                'cashier'       => $my_user->lname . ' ' . $my_user->fname,
+                'results_col'   => $results_col,
+                'results_ns'    => $results_ns,
+                'ns_result'     => array(),
+                'col_result'    => array(),
+            ]);
+
+            $content = $pdf->download()->getOriginalContent();
+            Storage::put('public/monthly/' . $filename, $content);
         }
 
         return $pdf->download($filename);

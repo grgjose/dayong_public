@@ -396,7 +396,7 @@
         $("#edit_lname").val($("#lname_"+id).html());
         $("#edit_birthdate").val(formatDate(new Date($("#birthdate_"+id).html())));
         $("#edit_contact_num").val($("#contact_num_"+id).html());
-        $("#editForm").attr("action", "/user-accounts/update/"+id);
+        $("#edit_form").attr("action", "/user-accounts/update/"+id);
     }
 
     function deleteFunction(id){

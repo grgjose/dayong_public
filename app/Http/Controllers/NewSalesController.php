@@ -265,7 +265,13 @@ class NewSalesController extends Controller
                             $lname = substr($name, 0, strpos($name, " "));
                         }
                         
-                        $users = DB::table('users')->where('lname', $lname)->get();
+                        $firstLetter = strtoupper(substr(trim($fname), 0, 1));
+
+                        // Check if Marketting Agent is in the User List (Last Name and First Letter of First Name)
+                        $users = DB::table('users')
+                            ->where('lname', $lname)
+                            ->whereRaw('UPPER(LEFT(fname, 1)) = ?', [$firstLetter])
+                            ->get();
 
                         if(count($users) == 0){ 
                             $excelMember = ExcelMembers::find($toImport->id);
@@ -303,10 +309,10 @@ class NewSalesController extends Controller
                         $fullname = $this->parseFullName(trim($toImport->phmember));
 
                         $members = DB::table('members')
-                        ->where('lname', '=', $fullname['lname'])
-                        ->where('fname', '=', $fullname['fname'])
-                        ->where('mname', '=', $fullname['mname'])
-                        ->where('ext', '=', $fullname['ext'])
+                        ->where('lname', '=', strtoupper($fullname['lname']))
+                        ->where('fname', '=', strtoupper($fullname['fname']))
+                        ->where('mname', '=', strtoupper($fullname['mname']))
+                        ->where('ext', '=', strtoupper($fullname['ext']))
                         ->get();
 
                         if(count($members) == 0){
@@ -586,6 +592,9 @@ class NewSalesController extends Controller
         return redirect('/new-sales')->with("success_msg","Created Successfully"); 
     }
 
+    /**
+     * View Details of the Member Program (New Sales Record)
+     */
     public function viewDetails($id)
     {
         $my_user = auth()->user();
@@ -628,6 +637,9 @@ class NewSalesController extends Controller
         } 
     }
 
+    /**
+     * Edit Details of the Member Program (New Sales Record)
+     */
     public function editDetails($id)
     {
         $my_user = auth()->user();
@@ -670,6 +682,9 @@ class NewSalesController extends Controller
         } 
     }
 
+    /**
+     * Function to Parse Full Name into First Name, Middle Name, Last Name, and Extension
+     */
     public function parseFullName($fullName) 
     {
         // Define common name extensions
@@ -740,6 +755,9 @@ class NewSalesController extends Controller
         ];
     }
 
+    /**
+     * Function to Convert Excel Date Format to PHP Date Format (M/D/YYYY H:i:s AM/PM)
+     */
     public function excelDateToPhpDate($excelDate) 
     {
         // Ensure it's a float
@@ -752,7 +770,11 @@ class NewSalesController extends Controller
         return date("n/j/Y g:i:s A", $unixTimestamp);
     }
 
-    public function excelToMySQLDateTime($excelDate) {
+    /**
+     * Function to Convert Excel Date Format to MySQL DateTime Format (Y-m-d H:i:s)
+     */
+    public function excelToMySQLDateTime($excelDate) 
+    {
         try {
             if (!is_numeric($excelDate)) {
                 return null;

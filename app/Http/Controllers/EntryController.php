@@ -24,7 +24,9 @@ use Exception;
 
 class EntryController extends Controller
 {
-    //
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
         if(auth()->check()){
@@ -52,6 +54,9 @@ class EntryController extends Controller
         }
     }
 
+    /**
+     * Store a newly created Collection in storage.
+     */
     public function store(Request $request)
     {
         if(auth()->check()){
@@ -123,11 +128,17 @@ class EntryController extends Controller
         }
     }
 
+    /**
+     * Edit the specified Collection in storage.
+     */
     public function update(Request $request)
     {
         //code
     }
 
+    /**
+     * Delete the specified Collection in storage.
+     */
     public function destroy(Request $request)
     {
         if(auth()->check()){
@@ -141,6 +152,9 @@ class EntryController extends Controller
         }
     }
  
+    /**
+     * Import Collection Records from Excel File and Store in Database
+     */
     public function import(Request $request)
     {
         $my_user = auth()->user(); $total_count = 0;
@@ -200,8 +214,14 @@ class EntryController extends Controller
                             $fname = substr($name, strpos($name, " ") + 1);
                             $lname = substr($name, 0, strpos($name, " "));
                         }
+
+                        $firstLetter = strtoupper(substr(trim($fname), 0, 1));
                         
-                        $users = DB::table('users')->where('lname', $lname)->get();
+                        // Check if Marketting Agent is in the User List (Last Name and First Letter of First Name)
+                        $users = DB::table('users')
+                            ->where('lname', $lname)
+                            ->whereRaw('UPPER(LEFT(fname, 1)) = ?', [$firstLetter])
+                            ->get();
 
                         if(count($users) == 0){ 
                             $excelEntry = ExcelEntries::find($toImport->id);
@@ -239,10 +259,10 @@ class EntryController extends Controller
                         $fullname = $this->parseFullName(trim($toImport->phmember));
 
                         $members = DB::table('members')
-                        ->where('lname', $fullname['lname'])
-                        ->where('fname', $fullname['fname'])
-                        ->where('mname', $fullname['mname'])
-                        ->where('ext', $fullname['ext'])
+                        ->where('lname', strtoupper($fullname['lname']))
+                        ->where('fname', strtoupper($fullname['fname']))
+                        ->where('mname', strtoupper($fullname['mname']))
+                        ->where('ext', strtoupper($fullname['ext']))
                         ->get();
 
                         if(count($members) == 0){ 

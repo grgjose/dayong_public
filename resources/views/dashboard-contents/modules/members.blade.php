@@ -109,6 +109,7 @@
                                             <!-- Add Combo Box Options -->
                                             <select class="form-control" id="combo_options" name="combo_options">
                                                 <option value="">Select Action</option>
+                                                <option value="option1"><a href="#">Mark as Suspended</a></option>
                                                 <option value="option1"><a href="#">Mark as Deceased</a></option>
                                                 <option value="option2"><a href="#">Print SOA</a></option>
                                             </select>

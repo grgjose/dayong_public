@@ -24,16 +24,16 @@ class ValidateOfficeHours
         }
 
         // Check if the user has the required permissions
-        if ($my_user->usertype != 1) {
-            // Check if Current PH Time is within Office Hours (7am to 6pm)
-            $current_time = now()->setTimezone('Asia/Manila')->format('H:i');
-            if ($current_time < '07:00' || $current_time > '17:00') {
-                auth()->logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-                return redirect('/')->with('error_msg', 'Access is available only from 7am to 6pm.');
-            }
-        }
+        // if ($my_user->usertype != 1) {
+        //     // Check if Current PH Time is within Office Hours (7am to 6pm)
+        //     $current_time = now()->setTimezone('Asia/Manila')->format('H:i');
+        //     if ($current_time < '07:00' || $current_time > '17:00') {
+        //         auth()->logout();
+        //         $request->session()->invalidate();
+        //         $request->session()->regenerateToken();
+        //         return redirect('/')->with('error_msg', 'Access is available only from 7am to 6pm.');
+        //     }
+        // }
 
         return $next($request);
     }

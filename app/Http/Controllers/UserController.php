@@ -164,6 +164,7 @@ class UserController extends Controller
         } else {
             return redirect('/');
         }
+
     }
 
     public function destroy(Request $request)

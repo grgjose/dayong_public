@@ -9,7 +9,7 @@
 					<div class="card-header">
 						<h2 class="card-title" style="padding-top: 10px;">Collection Table</h2>
 						@if($my_user->usertype != 3)
-							<button class="btn btn-success float-right" onclick="dateEntryShowForm()">
+							<button class="btn btn-success float-right" onclick="dataEntryShowForm()">
 								<span class="fas fa-plus"></span> Add Collection
 							</button>
 							<button class="btn btn-secondary float-right mr-3" data-toggle="modal" data-target="#ImportModal">

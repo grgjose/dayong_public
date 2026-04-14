@@ -16,7 +16,9 @@ use DateTime;
 
 class MainController extends Controller
 {
-    //
+    /**
+     * Shows the Login Page or Dashboard if already logged in
+     */
     public function index()
     {
         if(auth()->check()){
@@ -31,6 +33,9 @@ class MainController extends Controller
         }
     }
 
+    /**
+     * Show the application dashboard.
+     */
     public function dashboard()
     {
         if(auth()->check()){
@@ -55,6 +60,45 @@ class MainController extends Controller
                 }
             }
 
+            $currentYear = date('Y');
+
+            $collectionPerMonth  = [];
+            $newMembersPerMonth  = [];
+            $reactivatedPerMonth = [];
+            $transferredPerMonth = [];
+
+            for ($m = 1; $m <= 12; $m++) {
+                $monthStart = $currentYear . '-' . str_pad($m, 2, '0', STR_PAD_LEFT) . '-01';
+                $monthEnd   = date('Y-m-t', strtotime($monthStart));
+
+                // Collection = sum of amounts in entries, excluding REGISTRATION, for that month
+                $collectionPerMonth[] = DB::table('entries')
+                    ->whereDate('created_at', '>=', $monthStart)
+                    ->whereDate('created_at', '<=', $monthEnd)
+                    ->where('remarks', '!=', 'REGISTRATION')
+                    ->sum('amount');
+
+                // New Members = count of members_program rows created that month (no flags needed)
+                $newMembersPerMonth[] = DB::table('members_program')
+                    ->whereDate('created_at', '>=', $monthStart)
+                    ->whereDate('created_at', '<=', $monthEnd)
+                    ->count();
+
+                // Reactivated = entries flagged as reactivated that month
+                $reactivatedPerMonth[] = DB::table('entries')
+                    ->whereDate('created_at', '>=', $monthStart)
+                    ->whereDate('created_at', '<=', $monthEnd)
+                    //->where('is_reactivated', true)
+                    ->count();
+
+                // Transferred = entries flagged as transferred that month
+                $transferredPerMonth[] = DB::table('entries')
+                    ->whereDate('created_at', '>=', $monthStart)
+                    ->whereDate('created_at', '<=', $monthEnd)
+                    //->where('is_transferred', true)
+                    ->count();
+            }
+
             $members_today = DB::table('members')
             ->where('created_at', '>', $today.' 00:00:00')
             ->where('created_at', '<', $today.' 23:59:59')
@@ -70,13 +114,28 @@ class MainController extends Controller
                 $profit_today = $profit_today + (int)$entry->amount;
             }
 
+            $currentMonth     = date('Y-m');
+            $totalCollection  = DB::table('entries')->where('month_from', 'LIKE', $currentMonth.'%')->where('remarks','!=','REGISTRATION')->sum('amount');
+            $totalNewMembers  = DB::table('members_program')->whereDate('created_at','>=', date('Y-m-01'))->count();
+            $totalReactivated = DB::table('entries')->whereDate('created_at','>=', date('Y-m-01'))->count();
+            $totalTransferred = DB::table('entries')->whereDate('created_at','>=', date('Y-m-01'))->count();
+
             return view('main', [
-                'my_user' => $my_user,
-                'active_agents' => $active_agents,
-                'collections_today' => $collections_today,
+                'my_user'              => $my_user,
+                'active_agents'        => $active_agents,
+                'collections_today'    => $collections_today,
                 'total_col_this_month' => $total_col_this_month,
-                'members_today' => $members_today,
-                'profit_today' => $profit_today,
+                'members_today'        => $members_today,
+                'profit_today'         => $profit_today,
+                // Add these:
+                'collectionPerMonth'   => $collectionPerMonth,
+                'newMembersPerMonth'   => $newMembersPerMonth,
+                'reactivatedPerMonth'  => $reactivatedPerMonth,
+                'transferredPerMonth'  => $transferredPerMonth,
+                'totalCollection'      => $totalCollection,
+                'totalNewMembers'      => $totalNewMembers,
+                'totalReactivated'     => $totalReactivated,
+                'totalTransferred'     => $totalTransferred,
             ])
             ->with('header_title', 'Dashboard')
             ->with('subview', 'dashboard-contents.modules.dashboard')

@@ -65,54 +65,30 @@
         <!-- Monthly Cap Report Data -->
         <script>
           var salesChartData = {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
-                     'August', 'September', 'October', 'November', 'December'],
-            datasets: [
-              {
-                label: 'Collection',
-                backgroundColor: 'rgba(60,141,188,0.9)',
-                borderColor: 'rgba(60,141,188,0.8)',
-                pointRadius: false,
-                pointColor: 'rgba(60,141,188,0.8)',
-                pointStrokeColor: 'rgba(60,141,188,0.8)',
-                pointHighlightFill: 'rgba(60,141,188,0.8)',
-                pointHighlightStroke: 'rgba(60,141,188,0.8)',
-                data: [28, 48, 40, 19, 86, 27, 90, 95, 100, 20, 30, 42]
-              },
-              {
-                label: 'New Members (Sales)',
-                backgroundColor: 'rgba(217, 83, 79, 1)',
-                borderColor: 'rgba(217, 83, 79, 1)',
-                pointRadius: false,
-                pointColor: 'rgba(217, 83, 79, 1)',
-                pointStrokeColor: 'rgba(217, 83, 79, 1)',
-                pointHighlightFill: 'rgba(217, 83, 79, 1)',
-                pointHighlightStroke: 'rgba(217, 83, 79, 1)',
-                data: [65, 59, 80, 81, 56, 55, 40, 12, 16, 61, 42, 42]
-              },
-              {
-                label: 'Reactivated',
-                backgroundColor: 'rgba(92, 184, 92, 1)',
-                borderColor: 'rgba(92, 184, 92, 1)',
-                pointRadius: false,
-                pointColor: 'rgba(92, 184, 92, 1)',
-                pointStrokeColor: 'rgba(92, 184, 92, 1)',
-                pointHighlightFill: 'rgba(92, 184, 92, 1)',
-                pointHighlightStroke: 'rgba(92, 184, 92, 1)',
-                data: [65, 59, 80, 100, 100, 100, 100, 80, 81, 56, 55, 42]
-              },
-              {
-                label: 'Transferred',
-                backgroundColor: 'rgba(240, 173, 78, 1)',
-                borderColor: 'rgba(240, 173, 78, 1)',
-                pointRadius: false,
-                pointColor: 'rgba(240, 173, 78, 1)',
-                pointStrokeColor: 'rgba(240, 173, 78, 1)',
-                pointHighlightFill: 'rgba(240, 173, 78, 1)',
-                pointHighlightStroke: 'rgba(240, 173, 78, 1)',
-                data: [100, 95, 80, 81, 56, 55, 40, 80, 81, 56, 55, 100]
-              }
-            ]
+              labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
+                      'August', 'September', 'October', 'November', 'December'],
+              datasets: [
+                {
+                  label: 'Collection',
+                  // ... colors stay the same ...
+                  data: {!! json_encode($collectionPerMonth) !!}
+                },
+                {
+                  label: 'New Members (Sales)',
+                  // ...
+                  data: {!! json_encode($newMembersPerMonth) !!}
+                },
+                {
+                  label: 'Reactivated',
+                  // ...
+                  data: {!! json_encode($reactivatedPerMonth) !!}
+                },
+                {
+                  label: 'Transferred',
+                  // ...
+                  data: {!! json_encode($transferredPerMonth) !!}
+                }
+              ]
           }
         </script>
 
@@ -167,11 +143,12 @@
 
                     <div class="progress-group">
                       Collection 
-                      <span class="float-right"><b>160</b>/ 100,000</span>
+                      <span class="float-right"><b>{{ $totalCollection }}</b>/ 100,000</span>
                       <div class="progress progress-sm">
-                        <div class="progress-bar bg-primary" style="width: {{ (160/100000)*100 }}%"></div>
+                        <div class="progress-bar bg-primary" style="width: {{ ($totalCollection/100000)*100 }}%"></div>
                       </div>
                     </div>
+
                     <!-- /.progress-group -->
 
                     <div class="progress-group">

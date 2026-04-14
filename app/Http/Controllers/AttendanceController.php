@@ -56,7 +56,9 @@ class AttendanceController extends Controller
             $contents = new Attendance();
 
             $contents->user_id = $my_user->id;
-            $contents->time_in = date('Y-m-d H:i:s');
+
+            // Put Current Date and Time in PHT Timezone
+            $contents->time_in = now()->format('Y-m-d H:i:s');
 
             $contents->save();
 
@@ -80,7 +82,7 @@ class AttendanceController extends Controller
 
             // Save Request Data
             $contents = Attendance::find($record[0]->id);
-            $contents->time_out = date('Y-m-d H:i:s');
+            $contents->time_out = now()->format('Y-m-d H:i:s');
             $contents->save();
 
             // Back to View
