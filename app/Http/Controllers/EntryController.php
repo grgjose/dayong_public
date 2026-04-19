@@ -66,12 +66,14 @@ class EntryController extends Controller
                 "agent_id" => ['nullable'],
                 "member_id" => ['nullable'],
                 "or_number" => ['nullable'],
+                "or_date" => ['nullable'],
                 "amount" => ['nullable'],
                 "number_of_payment" => ['required'],
                 "program_id" => ['nullable'],
                 "month_from" => ['required'],
                 "month_to" => ['required'],
                 "incentives" => ['nullable'],
+                "fidelity_amount" => ['nullable'],
                 "reactivated" => ['nullable'],
                 "transferred" => ['nullable'],
                 "remarks" => ['nullable'],
@@ -91,12 +93,14 @@ class EntryController extends Controller
             $contents->agent_id = $validated["agent_id"];
             $contents->member_id = $validated["member_id"];
             $contents->or_number = $validated["or_number"];
+            $contents->or_date = $validated["or_date"];
             $contents->amount = $validated["amount"];
             $contents->number_of_payment = $validated["number_of_payment"];
             $contents->program_id = $validated["program_id"];
             $contents->month_from = $validated["month_from"];
             $contents->month_to = $validated["month_to"];
             $contents->incentives = $validated["incentives"];
+            $contents->fidelity_total = $validated["fidelity_amount"];
 
             // if($fid == true) {
             //     $contents->incentives_total = $validated["amount"] * ($validated["incentives"] / 100);

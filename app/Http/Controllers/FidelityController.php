@@ -144,18 +144,19 @@ class FidelityController extends Controller
             // Save Request Data (Member's Personal Information)
             $member = new Member();
 
-            $member->fname = $validated['fname'];
-            $member->mname = $validated['mname'];
-            $member->lname = $validated['lname'];
-            $member->ext = $validated['ext'];
+            $member->fname = strtoupper(trim($validated['fname']));
+            $member->mname = strtoupper(trim($validated['mname']));
+            $member->lname = strtoupper(trim($validated['lname']));
+            $member->ext = isset($validated['ext']) ? strtoupper(trim($validated['ext'])) : null;
             $member->birthdate = $validated['birthdate'];
             $member->sex = $validated['sex'];
-            $member->birthplace = $validated['birthplace'];
-            $member->citizenship = $validated['citizenship'];
-            $member->civil_status = $validated['civil_status'];
+            $member->birthplace = strtoupper(trim($validated['birthplace']));
+            $member->citizenship = strtoupper(trim($validated['citizenship']));
+            $member->civil_status = strtoupper(trim($validated['civil_status']));
             $member->contact_num = $validated['contact_num'];
             $member->email = $validated['email'];
-            $member->address = $validated['address'];
+            $member->address = strtoupper(trim($validated['address']));
+            $member->agent_id = $my_user->id;
 
             $member->save();
 
@@ -166,10 +167,10 @@ class FidelityController extends Controller
             // Save Request Data (Member's Claimants Information)
             $claimant = new Claimant();
 
-            $claimant->fname = $validated['fname_c'];
-            $claimant->mname = $validated['mname_c'];
-            $claimant->lname = $validated['lname_c'];
-            $claimant->ext = $validated['ext_c'];
+            $claimant->fname = strtoupper(trim($validated['fname_c']));
+            $claimant->mname = strtoupper(trim($validated['mname_c']));
+            $claimant->lname = strtoupper(trim($validated['lname_c']));
+            $claimant->ext = isset($validated['ext_c']) ? strtoupper(trim($validated['ext_c'])) : null;
             $claimant->birthdate = $validated['birthdate_c'];
             $claimant->sex = $validated['sex_c'];
             $claimant->contact_num = $validated['contact_num_c'];
@@ -186,13 +187,13 @@ class FidelityController extends Controller
             if($validated['fname_b1'] != ""){
                 $beneficiary_1 = new Beneficiary();
 
-                $beneficiary_1->fname = $validated['fname_b1'];
-                $beneficiary_1->mname = $validated['mname_b1'];
-                $beneficiary_1->lname = $validated['lname_b1'];
-                $beneficiary_1->ext = $validated['ext_b1'];
+                $beneficiary_1->fname = strtoupper(trim($validated['fname_b1']));
+                $beneficiary_1->mname = strtoupper(trim($validated['mname_b1']));
+                $beneficiary_1->lname = strtoupper(trim($validated['lname_b1']));
+                $beneficiary_1->ext = isset($validated['ext_b1']) ? strtoupper(trim($validated['ext_b1'])) : null;
                 $beneficiary_1->birthdate = $validated['birthdate_b1'];
-                $beneficiary_1->relationship = $validated['relationship_b1'];
-                $beneficiary_1->sex = $validated['sex_b1'];
+                $beneficiary_1->relationship = strtoupper(trim($validated['relationship_b1']));
+                $beneficiary_1->sex = strtoupper(trim($validated['sex_b1']));
                 $beneficiary_1->contact_num = $validated['contact_num_b1']; 
 
                 $beneficiary_1->save();
@@ -258,11 +259,13 @@ class FidelityController extends Controller
         }
     }
 
-    public function update(Request $request, $id){
+    public function update(Request $request, $id)
+    {
         //code
     }
 
-    public function destroy(Request $request){
+    public function destroy(Request $request)
+    {
         if(auth()->check()){
 
             $memberProgram = DB::table('members_program')->where('id', $request->input("id"))->get();

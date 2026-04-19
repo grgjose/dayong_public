@@ -1031,8 +1031,8 @@
             //Data Entry Function
             try
             {
-                if(window.location.href.includes("/entries")){
-                    dateEntryMemberChanged();
+                if(window.location.pathname.includes("/entries")){
+                    dataEntryMemberChanged();
                 }
             } 
             catch(e)
@@ -1452,6 +1452,28 @@
 
     });
 
+    </script>
+
+    <!-- All Pages Script -->
+    <script>
+        // ===================== ENFORCE UPPERCASE ON ALL .text-uppercase INPUTS =====================
+        $(document).ready(function () {
+
+            // On input: transform value to uppercase in real-time
+            $(document).on('input', 'input.text-uppercase, textarea.text-uppercase', function () {
+                var pos = this.selectionStart;
+                this.value = this.value.toUpperCase();
+                this.setSelectionRange(pos, pos);
+            });
+
+            // On form submit: ensure all .text-uppercase fields are uppercased before sending
+            $(document).on('submit', 'form', function () {
+                $(this).find('input.text-uppercase, textarea.text-uppercase').each(function () {
+                    $(this).val($(this).val().toUpperCase());
+                });
+            });
+
+        });
     </script>
 
     <!-- Report Generation Script -->

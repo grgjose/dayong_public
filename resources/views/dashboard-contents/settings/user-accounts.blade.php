@@ -1,4 +1,4 @@
-<!-- Main content -->
+<!-- Main Content -->
 <section class="content">
     <div class="container-fluid">
       <div class="row">
@@ -9,7 +9,7 @@
                 <div class="card-header">
                     <h2 class="card-title" style="padding-top: 10px;">User Accounts</h2>
 
-                    <button class="btn btn-success float-right" style="color: white;" onclick="showForm()">
+                    <button class="btn btn-success float-right" style="color: white;" onclick="userShowForm()">
                     <span class="fas fa-plus"></span> Add User
                     </button>
 
@@ -48,20 +48,20 @@
                         <td>{{ $user->status; }}</td>
                         <td>
                             <button class="btn btn-outline-secondary"
-                            onclick="viewFunction({{ $user->id; }})" >
+                            onclick="userViewFunction({{ $user->id; }})" >
                                 <span class="fas fa-eye"></span>
                             </button>
                             <button class="btn btn-outline-info"
-                            onclick="editFunction({{ $user->id; }})" >
+                            onclick="userEditFunction({{ $user->id; }})" >
                                 <span class="fas fa-pen"></span>
                             </button>
                             <button class="btn btn-outline-danger" data-toggle="modal" data-target="#DeleteModal"
-                            onclick="deleteFunction({{ $user->id; }})" >
+                            onclick="userDeleteFunction({{ $user->id; }})" >
                                 <span class="fas fa-trash"></span>
                             </button>
                             @if($user->status == "PENDING")
                             <button class="btn btn-outline-success"
-                            onclick="approveFunction({{ $user->id; }})" >
+                            onclick="userApproveFunction({{ $user->id; }})" >
                                 <span class="fas fa-check"></span>
                             </button>
                             @endif
@@ -84,14 +84,14 @@
             </div>
 
             <!-- ADD SECTION --> 
-            <div class="card card-primary" id="form" style="display: none;">
+            <div class="card card-primary" id="add_table" style="display: none;">
                 <div class="card-header">
                     <h3 class="card-title" style="padding-top: 10px;">Create User Form</h3>
-                    <button class="btn btn-secondary float-right" style="color: white;" onclick="hideForm()">
+                    <button class="btn btn-secondary float-right" style="color: white;" onclick="userHideForm()">
                         <span class="fas fa-times"></span> Cancel
                     </button>
                 </div>
-                <form id="form_tag" action="/user-accounts/store" method="post" enctype="multipart/form-data">
+                <form id="add_form" action="/user-accounts/store" method="post" enctype="multipart/form-data">
                     @csrf
                     <div class="card-body">
 
@@ -163,20 +163,20 @@
                     </div>
                     <div class="card-footer">
                         <button id="store_btn" type="submit" class="btn btn-primary">Submit</button>
-                        <button type="button" class="btn btn-secondary" style="margin-left: 10px;" onclick="hideForm()">Cancel</button>
+                        <button type="button" class="btn btn-secondary" style="margin-left: 10px;" onclick="userHideForm()">Cancel</button>
                     </div>
                 </form>
             </div>
 
             <!-- VIEW SECTION --> 
-            <div class="card card-primary" id="view_form" style="display: none;">
+            <div class="card card-primary" id="view_table" style="display: none;">
                 <div class="card-header">
                     <h3 class="card-title" style="padding-top: 10px;">Update User Form</h3>
-                    <button class="btn btn-secondary float-right" style="color: white;" onclick="hideForm()">
+                    <button class="btn btn-secondary float-right" style="color: white;" onclick="userHideForm()">
                         <span class="fas fa-times"></span> Cancel
                     </button>
                 </div>
-                <form id="editForm" action="/user-accounts/update" method="post" enctype="multipart/form-data">
+                <form id="view_form" action="/user-accounts/update" method="post" enctype="multipart/form-data">
                     @method('PUT')
                     @csrf
                     <div class="card-body">
@@ -229,20 +229,20 @@
 
                     </div>
                     <div class="card-footer">
-                        <button type="button" class="btn btn-secondary" style="margin-left: 10px;" onclick="hideForm()">Cancel</button>
+                        <button type="button" class="btn btn-secondary" style="margin-left: 10px;" onclick="userHideForm()">Cancel</button>
                     </div>
                 </form>
             </div>
 
             <!-- EDIT SECTION --> 
-            <div class="card card-primary" id="edit_form" style="display: none;">
+            <div class="card card-primary" id="edit_table" style="display: none;">
                 <div class="card-header">
                     <h3 class="card-title" style="padding-top: 10px;">Update User Form</h3>
-                    <button class="btn btn-secondary float-right" style="color: white;" onclick="hideForm()">
+                    <button class="btn btn-secondary float-right" style="color: white;" onclick="userHideForm()">
                         <span class="fas fa-times"></span> Cancel
                     </button>
                 </div>
-                <form id="editForm" action="/user-accounts/update" method="post" enctype="multipart/form-data">
+                <form id="edit_form" action="/user-accounts/update" method="post" enctype="multipart/form-data">
                     @method('PUT')
                     @csrf
                     <div class="card-body">
@@ -315,7 +315,7 @@
                     </div>
                     <div class="card-footer">
                         <button id="store_btn" type="submit" class="btn btn-primary">Submit</button>
-                        <button type="button" class="btn btn-secondary" style="margin-left: 10px;" onclick="hideForm()">Cancel</button>
+                        <button type="button" class="btn btn-secondary" style="margin-left: 10px;" onclick="userHideForm()">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -324,9 +324,9 @@
       </div>
     </div>
 </section>
-<!-- /.content -->
+<!-- / Main Content -->
 
-<!-- Delete Modal -->
+<!-- DELETE MODAL -->
 <div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog" aria-labelledby="DeleteModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
         <div class="modal-content">
@@ -336,7 +336,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form id="deleteForm" action="/members/destroy" method="POST">
+            <form id="delete_form" action="/user-accounts/destroy" method="POST">
                 @csrf
                 <div class="modal-body">
                     <h6>Do you want to remove <span id="del_fname"></span> <span id="del_lname"></span> as a System User?</h6>
@@ -353,24 +353,25 @@
 
 <script>
 
-    function hideForm(){
-        $("#form").attr("style", "display: none;");
-        $("#edit_form").attr("style", "display: none;");
-        $("#view_form").attr("style", "display: none;");
+    function userHideForm(){
+        $("#add_table").attr("style", "display: none;");
+        $("#edit_table").attr("style", "display: none;");
+        $("#view_table").attr("style", "display: none;");
         $("#table").removeAttr("style");
     }
 
-    function showForm(){
+    function userShowForm(){
         $("#table").attr("style", "display: none;");
-        $("#view_form").attr("style", "display: none;");
-        $("#edit_form").attr("style", "display: none;");
-        $("#form").removeAttr("style");
+        $("#view_table").attr("style", "display: none;");
+        $("#edit_table").attr("style", "display: none;");
+        $("#add_table").removeAttr("style");
     }
 
-    function viewFunction(id){
+    function userViewFunction(id){
         $("#table").attr("style", "display: none;");
-        $("#edit_form").attr("style", "display: none;");
-        $("#view_form").removeAttr("style");
+        $('#add_table').attr("style", "display: none;");
+        $("#edit_table").attr("style", "display: none;");
+        $("#view_table").removeAttr("style");
 
         $("#view_username").val($("#username_"+id).html());
         $("#view_usertype").val($("#usertype_"+id).html()).trigger("chosen:updated");;
@@ -380,13 +381,13 @@
         $("#view_lname").val($("#lname_"+id).html());
         $("#view_birthdate").val(formatDate(new Date($("#birthdate_"+id).html())));
         $("#view_contact_num").val($("#contact_num_"+id).html());
-        $("#viewForm").attr("action", "/user-accounts/update/"+id);
     }
 
-    function editFunction(id){
+    function userEditFunction(id){
         $("#table").attr("style", "display: none;");
-        $("#view_form").attr("style", "display: none;");
-        $("#edit_form").removeAttr("style");
+        $('#add_table').attr("style", "display: none;");
+        $("#view_table").attr("style", "display: none;");
+        $("#edit_table").removeAttr("style");
 
         $("#edit_username").val($("#username_"+id).html());
         $("#edit_usertype").val($("#usertype_"+id).html()).trigger("chosen:updated");;
@@ -399,7 +400,7 @@
         $("#edit_form").attr("action", "/user-accounts/update/"+id);
     }
 
-    function deleteFunction(id){
+    function userDeleteFunction(id){
         var fname = $("#"+id+"_fname").html();
         var lname = $("#"+id+"_lname").html();
         $("#del_fname").html(fname);
@@ -407,7 +408,7 @@
         $("#delete_id").val(id);
     }
 
-    function approveFunction(id){
+    function userApproveFunction(id){
         window.location.href="/user-accounts/approve/"+id;
     }
 

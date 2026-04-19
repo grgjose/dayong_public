@@ -179,18 +179,18 @@ class MemberController extends Controller
 
                 // ✅ MEMBER
                     $member = new Member();
-                    $member->fname = $validated['fname'];
-                    $member->mname = $validated['mname'] ?? null;
-                    $member->lname = $validated['lname'];
-                    $member->ext = $validated['ext'] ?? null;
-                    $member->contact_num = $validated['contact_num'];
-                    $member->email = $validated['email'] ?? null;
+                    $member->fname = strtoupper(trim($validated['fname']));
+                    $member->mname = isset($validated['mname']) ? strtoupper(trim($validated['mname'])) : null;
+                    $member->lname = strtoupper(trim($validated['lname']));
+                    $member->ext = isset($validated['ext']) ? strtoupper(trim($validated['ext'])) : null;
+                    $member->contact_num = trim($validated['contact_num']);
+                    $member->email = isset($validated['email']) ? strtolower(trim($validated['email'])) : null;
                     $member->birthdate = $validated['birthdate'];
                     $member->sex = $validated['sex'];
-                    $member->birthplace = $validated['birthplace'];
-                    $member->citizenship = $validated['citizenship'];
+                    $member->birthplace = strtoupper(trim($validated['birthplace']));
+                    $member->citizenship = strtoupper(trim($validated['citizenship']));
                     $member->civil_status = $validated['civil_status'];
-                    $member->address = $validated['address'];
+                    $member->address = strtoupper(trim($validated['address']));
                     $member->agent_id = $validated['agent_id'] ?? null;
                     $member->encoder_id = $my_user->id;
                     $member->branch_id = $validated['branch_id'];
@@ -198,13 +198,13 @@ class MemberController extends Controller
 
                 // ✅ CLAIMANT
                     $claimant = new Claimant();
-                    $claimant->fname = $validated['fname_c'];
-                    $claimant->mname = $validated['mname_c'];
-                    $claimant->lname = $validated['lname_c'];
-                    $claimant->ext = $validated['ext_c'] ?? null;
+                    $claimant->fname = strtoupper(trim($validated['fname_c']));
+                    $claimant->mname = strtoupper(trim($validated['mname_c']));
+                    $claimant->lname = strtoupper(trim($validated['lname_c']));
+                    $claimant->ext = isset($validated['ext_c']) ? strtoupper(trim($validated['ext_c'])) : null;
                     $claimant->birthdate = $validated['birthdate_c'];
                     $claimant->sex = $validated['sex_c'];
-                    $claimant->contact_num = $validated['contact_num_c'];
+                    $claimant->contact_num = trim($validated['contact_num_c']);
                     $claimant->save();
 
                     $member->claimant_id = $claimant->id;
@@ -221,15 +221,15 @@ class MemberController extends Controller
                      */
                     $beneficiary = Beneficiary::firstOrCreate(
                         [
-                            'fname' => $item['fname'],
-                            'lname' => $item['lname'],
+                            'fname' => strtoupper(trim($item['fname'])),
+                            'lname' => strtoupper(trim($item['lname'])),
                             'birthdate' => $item['birthdate'],
                         ],
                         [
-                            'mname' => $item['mname'] ?? null,
-                            'ext' => $item['ext'] ?? null,
+                            'mname' => isset($item['mname']) ? strtoupper(trim($item['mname'])) : null,
+                            'ext' => isset($item['ext']) ? strtoupper(trim($item['ext'])) : null,
                             'sex' => $item['sex'],
-                            'contact_num' => $item['contact_num'],
+                            'contact_num' => trim($item['contact_num']),
                         ]
                     );
 
@@ -341,18 +341,18 @@ class MemberController extends Controller
                 $member = Member::with(['claimant', 'beneficiaries'])->findOrFail($id);
 
                 // ✅ Update Member
-                $member->fname = $validated['fname'];
-                $member->mname = $validated['mname'] ?? null;
-                $member->lname = $validated['lname'];
-                $member->ext = $validated['ext'] ?? null;
+                $member->fname = strtoupper(trim($validated['fname']));
+                $member->mname = isset($validated['mname']) ? strtoupper(trim($validated['mname'])) : null;
+                $member->lname = strtoupper(trim($validated['lname']));
+                $member->ext = isset($validated['ext']) ? strtoupper(trim($validated['ext'])) : null;
                 $member->birthdate = $validated['birthdate'];
                 $member->sex = $validated['sex'];
-                $member->birthplace = $validated['birthplace'];
-                $member->citizenship = $validated['citizenship'];
-                $member->civil_status = $validated['civil_status'];
+                $member->birthplace = strtoupper(trim($validated['birthplace']));
+                $member->citizenship = strtoupper(trim($validated['citizenship']));
+                $member->civil_status = strtoupper(trim($validated['civil_status']));
                 $member->contact_num = $validated['contact_num'];
                 $member->email = $validated['email'] ?? null;
-                $member->address = $validated['address'];
+                $member->address = strtoupper(trim($validated['address']));
                 $member->agent_id = $member->agent_id; // keep existing unless you allow editing
                 $member->encoder_id = $my_user->id;     // optional: update who edited
                 $member->save();

@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // =====================================================================
-        // PART 1: Original Excel Seeder (Unchanged)
+        // PART 1: Original Excel Seeder (Unchanged structure, uppercase applied)
         // =====================================================================
 
         $path = storage_path('app/public/imports/DatabaseSeeder.xlsx');
@@ -50,7 +50,8 @@ class DatabaseSeeder extends Seeder
         foreach (array_slice($usertypes, 1) as $row) {
             if ($row[1] != null && $row[1] != '') {
                 Usertype::factory()->create([
-                    'usertype' => $row[1],
+                    // usertype is a label/code — uppercase for consistency
+                    'usertype' => strtoupper(trim($row[1])),
                 ]);
                 $usertypes_arr[$row[1]] = $i;
                 $i++;
@@ -60,15 +61,15 @@ class DatabaseSeeder extends Seeder
         foreach (array_slice($users, 1) as $row) {
             if ($row[1] != '' && $row[1] != null) {
                 User::factory()->create([
-                    'username'    => $row[1],
+                    'username'    => $row[1],                          // login credential — keep as-is
                     'usertype'    => $usertypes_arr[$row[2]],
-                    'fname'       => $row[3],
-                    'mname'       => $row[4],
-                    'lname'       => $row[5],
-                    'ext'         => $row[6],
-                    'email'       => $row[7],
+                    'fname'       => strtoupper(trim($row[3])),
+                    'mname'       => strtoupper(trim($row[4])),
+                    'lname'       => strtoupper(trim($row[5])),
+                    'ext'         => $row[6] ? strtoupper(trim($row[6])) : null,
+                    'email'       => $row[7],                          // email — keep lowercase convention
                     'contact_num' => $row[8],
-                    'address'     => $row[9],
+                    'address'     => strtoupper(trim($row[9])),
                     'birthdate'   => is_numeric($row[10])
                         ? Date::excelToDateTimeObject($row[10])->format('Y-m-d')
                         : null,
@@ -81,11 +82,11 @@ class DatabaseSeeder extends Seeder
         foreach (array_slice($branches, 1) as $row) {
             if ($row[3] != '') {
                 Branch::factory()->create([
-                    'code'        => $row[1],
-                    'city'        => $row[2],
-                    'branch'      => $row[3],
-                    'address'     => $row[4],
-                    'description' => $row[5],
+                    'code'        => strtoupper(trim($row[1])),
+                    'city'        => strtoupper(trim($row[2])),
+                    'branch'      => strtoupper(trim($row[3])),
+                    'address'     => strtoupper(trim($row[4])),
+                    'description' => strtoupper(trim($row[5])),
                 ]);
             }
         }
@@ -93,8 +94,8 @@ class DatabaseSeeder extends Seeder
         foreach (array_slice($programs, 1) as $row) {
             if ($row[1] != '') {
                 Program::factory()->create([
-                    'code'               => $row[1],
-                    'description'        => $row[2],
+                    'code'               => strtoupper(trim($row[1])),
+                    'description'        => strtoupper(trim($row[2])),
                     'beneficiaries_count'=> $row[3],
                     'age_min'            => $row[4],
                     'age_max'            => $row[5],
@@ -115,7 +116,7 @@ class DatabaseSeeder extends Seeder
 
         // --- Resolve Baliok branch ---
         $baliokBranch = DB::table('branches')
-            ->where('branch', 'Baliok')
+            ->where('branch', 'BALIOK')   // uppercase to match seeded value
             ->first();
 
         if (!$baliokBranch) {
@@ -168,12 +169,12 @@ class DatabaseSeeder extends Seeder
 
         foreach ($masData as $mas) {
             $user = User::create([
-                'username'    => strtolower($mas['fname'][0] . $mas['lname']),
+                'username'    => strtolower($mas['fname'][0] . $mas['lname']), // username stays lowercase
                 'usertype'    => 3,
-                'fname'       => $mas['fname'],
-                'mname'       => $mas['mname'],
-                'lname'       => $mas['lname'],
-                'email'       => $mas['email'],
+                'fname'       => strtoupper(trim($mas['fname'])),
+                'mname'       => strtoupper(trim($mas['mname'])),
+                'lname'       => strtoupper(trim($mas['lname'])),
+                'email'       => $mas['email'],                                // email stays lowercase
                 'contact_num' => '09' . rand(100000000, 999999999),
                 'address'     => 'BALIOK, DAVAO CITY',
                 'birthdate'   => Carbon::now()->subYears(rand(25, 40))->format('Y-m-d'),
@@ -289,7 +290,7 @@ class DatabaseSeeder extends Seeder
 
         foreach ($masUsers as $masIdx => $masUser) {
 
-            $memberSlice = array_slice($memberPool, $masIdx * 8, 8);
+            $memberSlice   = array_slice($memberPool,   $masIdx * 8, 8);
             $claimantSlice = array_slice($claimantPool, $masIdx * 8, 8);
 
             foreach ($memberSlice as $mIdx => $mData) {
@@ -297,7 +298,7 @@ class DatabaseSeeder extends Seeder
                 $absoluteIdx = $masIdx * 8 + $mIdx;
 
                 // --- Pick a random program ---
-                $program = $allPrograms->random();
+                $program   = $allPrograms->random();
                 $amountMin = (float) ($program->amount_min ?? 500);
 
                 // --- Member birthdate: 18-55 years old ---
@@ -306,41 +307,42 @@ class DatabaseSeeder extends Seeder
                     ->subDays(rand(0, 364))
                     ->format('Y-m-d');
 
+                // Email uses lowercase convention
                 $memberEmail = strtolower(
                     $mData['fname'] . '.' . str_replace(' ', '', $mData['lname'])
                 ) . '@gmail.com';
 
                 // --- Create Member ---
                 $member = Member::create([
-                    'fname'       => $mData['fname'],
-                    'mname'       => $mData['mname'],
-                    'lname'       => $mData['lname'],
-                    'sex'         => $mData['sex'],
-                    'birthdate'   => $memberBirthdate,
-                    'civil_status'=> $mData['sex'] === 'MALE' ? 'MARRIED' : 'MARRIED',
-                    'contact_num' => '09' . rand(100000000, 999999999),
-                    'email'       => $memberEmail,
-                    'address'     => 'BALIOK, DAVAO CITY',
-                    'citizenship' => 'FILIPINO',
-                    'birthplace'  => 'DAVAO CITY',
-                    'agent_id'    => $masUser->id,
-                    'encoder_id'  => $encoder->id,
-                    'branch_id'   => $baliokBranch->id,
-                    'status'      => 'active',
-                    'is_deleted'  => false,
+                    'fname'        => strtoupper(trim($mData['fname'])),
+                    'mname'        => strtoupper(trim($mData['mname'])),
+                    'lname'        => strtoupper(trim($mData['lname'])),
+                    'sex'          => $mData['sex'],
+                    'birthdate'    => $memberBirthdate,
+                    'civil_status' => 'MARRIED',
+                    'contact_num'  => '09' . rand(100000000, 999999999),
+                    'email'        => $memberEmail,           // email stays lowercase
+                    'address'      => 'BALIOK, DAVAO CITY',
+                    'citizenship'  => 'FILIPINO',
+                    'birthplace'   => 'DAVAO CITY',
+                    'agent_id'     => $masUser->id,
+                    'encoder_id'   => $encoder->id,
+                    'branch_id'    => $baliokBranch->id,
+                    'status'       => 'active',
+                    'is_deleted'   => false,
                 ]);
 
                 // --- Create Claimant ---
-                $cData = $claimantSlice[$mIdx];
+                $cData           = $claimantSlice[$mIdx];
                 $claimantBirthdate = Carbon::now()
                     ->subYears(rand(20, 55))
                     ->subDays(rand(0, 364))
                     ->format('Y-m-d');
 
                 $claimant = Claimant::create([
-                    'fname'       => $cData['fname'],
-                    'mname'       => $cData['mname'],
-                    'lname'       => $cData['lname'],
+                    'fname'       => strtoupper(trim($cData['fname'])),
+                    'mname'       => strtoupper(trim($cData['mname'])),
+                    'lname'       => strtoupper(trim($cData['lname'])),
                     'birthdate'   => $claimantBirthdate,
                     'sex'         => $mData['sex'] === 'MALE' ? 'FEMALE' : 'MALE',
                     'contact_num' => '09' . rand(100000000, 999999999),
@@ -360,15 +362,18 @@ class DatabaseSeeder extends Seeder
                     $benFname = $benFirstNames[$benIdx % count($benFirstNames)];
                     $benLname = $benLastNames[$absoluteIdx % count($benLastNames)];
                     $benRel   = $benRelationships[array_rand($benRelationships)];
-                    $benSex   = in_array($benFname, ['ANNE','CLAIRE','DANA','ELSA','FAITH','GRACE',
+                    $benMname = strtoupper(trim($benLastNames[($absoluteIdx + $b + 1) % count($benLastNames)]));
+                    $benSex   = in_array($benFname, [
+                        'ANNE','CLAIRE','DANA','ELSA','FAITH','GRACE',
                         'HAZEL','IVY','JANE','KATE','LARA','MARY','NINA','OLGA','PAULA','QUEEN',
                         'RUTH','SHEILA','TINA','UNA','VERA','WENDY','XENA','YAEL','ZOE','ABBY',
-                        'BELLA','CHLOE','DIANA','EVA','FAYE','GINA']) ? 'FEMALE' : 'MALE';
+                        'BELLA','CHLOE','DIANA','EVA','FAYE','GINA',
+                    ]) ? 'FEMALE' : 'MALE';
 
                     $beneficiary = Beneficiary::create([
-                        'fname'       => $benFname,
-                        'mname'       => $benLastNames[($absoluteIdx + $b + 1) % count($benLastNames)],
-                        'lname'       => $benLname,
+                        'fname'       => strtoupper(trim($benFname)),
+                        'mname'       => $benMname,
+                        'lname'       => strtoupper(trim($benLname)),
                         'birthdate'   => $benBirthdate,
                         'sex'         => $benSex,
                         'contact_num' => '09' . rand(100000000, 999999999),
@@ -376,7 +381,7 @@ class DatabaseSeeder extends Seeder
 
                     // Attach to member via pivot
                     $member->beneficiaries()->syncWithoutDetaching([
-                        $beneficiary->id => ['relationship' => $benRel],
+                        $beneficiary->id => ['relationship' => strtoupper(trim($benRel))],
                     ]);
 
                     $benIdx++;
@@ -409,45 +414,35 @@ class DatabaseSeeder extends Seeder
 
                 // --- Registration Entry ---
                 Entry::create([
-                    'branch_id'       => $baliokBranch->id,
-                    'encoder_id'      => $encoder->id,
-                    'agent_id'        => $masUser->id,
-                    'member_id'       => $member->id,
-                    'or_number'       => $orCounter++,
-                    'or_date'         => $regDate->copy()->addDays(rand(1, 2))->format('Y-m-d H:i:s'),
-                    'amount'          => 500,
+                    'branch_id'        => $baliokBranch->id,
+                    'encoder_id'       => $encoder->id,
+                    'agent_id'         => $masUser->id,
+                    'member_id'        => $member->id,
+                    'or_number'        => $orCounter++,
+                    'or_date'          => $regDate->copy()->addDays(rand(1, 2))->format('Y-m-d H:i:s'),
+                    'amount'           => 500,
                     'number_of_payment'=> 1,
-                    'program_id'      => $program->id,
-                    'month_from'      => '2025-04',
-                    'month_to'        => '2025-04',
-                    'date_remitted'   => $regDate->format('Y-m-d H:i:s'),
-                    'incentives'      => 0,
-                    'is_reactivated'  => false,
-                    'is_transferred'  => false,
-                    'is_remitted'     => true,
-                    'remarks'         => 'REGISTRATION',
-                    'created_at'      => $regDate,
-                    'updated_at'      => $regDate,
+                    'program_id'       => $program->id,
+                    'month_from'       => $regDate->format('Y-m'),
+                    'month_to'         => $regDate->format('Y-m'),
+                    'date_remitted'    => $regDate->format('Y-m-d H:i:s'),
+                    'incentives'       => 0,
+                    'is_reactivated'   => false,
+                    'is_transferred'   => false,
+                    'is_remitted'      => true,
+                    'remarks'          => 'REGISTRATION',
+                    'created_at'       => $regDate,
+                    'updated_at'       => $regDate,
                 ]);
 
-                // ----------------------------------------------------------------
-                // 13 Monthly Collection Entries
-                // April 2025 (month 1) → April 2026 (month 13)
-                // ----------------------------------------------------------------
+                // --- Monthly Collection Entries (13 months starting May 2025) ---
+                $termMax    = (int) ($program->term_max ?? 13);
+                $paymentDay = rand(1, 28);
 
-                $collectionMonths = [];
-                $start = Carbon::create(2025, 4, 1);
-                for ($m = 0; $m < 13; $m++) {
-                    $collectionMonths[] = $start->copy()->addMonths($m);
-                }
+                for ($m = 0; $m < $termMax; $m++) {
+                    $monthDate  = $regDate->copy()->addMonths($m + 1);
+                    $yearMonth  = $monthDate->format('Y-m');
 
-                foreach ($collectionMonths as $monthDate) {
-
-                    $yearMonth   = $monthDate->format('Y-m');
-                    $daysInMonth = $monthDate->daysInMonth;
-
-                    // Random payment day within the month
-                    $paymentDay  = rand(1, $daysInMonth);
                     $paymentDate = Carbon::create(
                         $monthDate->year,
                         $monthDate->month,
@@ -488,6 +483,6 @@ class DatabaseSeeder extends Seeder
 
         $this->command->info('Test data seeded successfully!');
         $this->command->info('3 MAS users, 24 Members, 24 Claimants, 48 Beneficiaries');
-        $this->command->info('24 Registration entries + 312 Monthly collection entries');
+        $this->command->info('24 Registration entries + Monthly collection entries');
     }
 }

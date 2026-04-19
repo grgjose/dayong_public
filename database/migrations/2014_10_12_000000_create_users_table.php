@@ -31,6 +31,7 @@ return new class extends Migration
             $table->string('status')->nullable(); // Pending Registration, Active, Inactive, Suspended, Resigned
             $table->string('reset_token')->nullable();
             $table->timestamp('reset_token_sent')->nullable();
+            $table->boolean('is_deleted')->default(false)->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

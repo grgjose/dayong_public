@@ -211,7 +211,7 @@
 											name="program_id"
 											onchange="programChanged()">
 											@foreach($programs as $program)
-												<option value="{{ $program->id; }}">{{ $program->code; }}</option>
+												<option value="{{ $program->id; }}" data-amount="{{ $program->amount_min }}">{{ $program->code; }}</option>
 											@endforeach
 										</select>
 									</div>
@@ -219,6 +219,10 @@
 									<div class="form-group col">
 										<label>OR:</label>
 										<input type="text" class="form-control" id="or_number" name="or_number" required>
+									</div>
+									<div class="form-group col">
+										<label>OR Date:</label>
+										<input type="date" class="form-control" id="or_date" name="or_date" required>
 									</div>
 
 									<div class="form-group col">
@@ -252,9 +256,11 @@
 									<div class="form-group col">
 										<label>Incentive:</label>
 										<input type="number" class="form-control" id="incentives" name="incentives" step="0.01">
-
 									</div>
-
+									<div class="form-group col">
+										<label>Fidelity Amount:</label>
+										<input type="number" class="form-control" id="fidelity_amount" name="fidelity_amount" step="0.01">
+									</div>
 									<div class="form-group col">
 										<div class="custom-control custom-switch custom-switch-on-warning"
 											style="padding-left: 3.25rem; padding-top: 2.25rem;">
@@ -286,7 +292,7 @@
 
 						<div class="card-footer">
 							<button type="submit" class="btn btn-primary">Submit</button>
-							<button type="button" class="btn btn-secondary" onclick="dateEntryHideForm()">Cancel</button>
+							<button type="button" class="btn btn-secondary" onclick="dataEntryHideForm()">Cancel</button>
 						</div>
 					</form>
 				</div>

@@ -244,12 +244,13 @@ class ExcelNewSalesController extends Controller
             }
 
             return [
-                'fname' => ucwords(strtolower($firstName)),
-                'mname' => ucwords(strtolower($middleName)),
-                'lname' => ucwords(strtolower($lastName)),
-                'ext' => ucwords(strtolower($nameExtension))
+                'fname' => strtoupper(trim($firstName)),
+                'mname' => strtoupper(trim($middleName)),
+                'lname' => strtoupper(trim($lastName)),
+                'ext'   => strtoupper(trim($nameExtension)),
             ];
         }
+        
 
         // Default format: "First Middle Last Extension"
         $parts = explode(' ', $fullName);
@@ -489,8 +490,8 @@ class ExcelNewSalesController extends Controller
                 $name = ucwords(strtolower(trim($toImport->phmember)), " .");
                 if(strpos($name, ",") > 0){
                     $tmp = explode(",", $name);
-                    $member->fname = ucwords($tmp[1]);
-                    $member->lname = ucwords($tmp[0]);
+                    $member->fname = strtoupper(trim($tmp[1]));
+                    $member->lname = strtoupper(trim($tmp[0]));
                 } else {
                     $member->fname = substr($name, strpos($name, " ") + 1);
                     $member->lname = substr($name, 0, strpos($name, " "));
@@ -513,10 +514,10 @@ class ExcelNewSalesController extends Controller
                         $member->birthdate = $birthdate;
                     }
 
-                    $member->civil_status = ucwords(strtolower(trim($toImport->civil_status)), " .");
-                    $member->contact_num = ucwords(strtolower(trim($toImport->contact_num)), " .");
-                    $member->address = strval(ucwords(strtolower(trim($toImport->address)), " ."));
-
+                    $member->civil_status = strtoupper(trim($toImport->civil_status));
+                    $member->contact_num = strtoupper(trim($toImport->contact_num));
+                    $member->address = strtoupper(trim(strval($toImport->address)));
+    
                     if(is_numeric($toImport->timestamp)){
                         $timestamp = $this->excelTimestampToString((float)trim($toImport->timestamp));
                     } else {

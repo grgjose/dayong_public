@@ -22,6 +22,7 @@ class UserController extends Controller
                 ->join('usertypes', 'users.usertype', '=', 'usertypes.id')
                 ->select('users.*', 'usertypes.usertype as usertype_name')
                 ->orderBy('users.id')
+                ->where('users.is_deleted', false)
                 ->get();
 
             return view('main', [
@@ -70,36 +71,73 @@ class UserController extends Controller
                 "password" => ['nullable'],
             ]);
 
-            // Get Next Auto Increment
-            $statement = DB::select("SHOW TABLE STATUS LIKE 'users'");
-            $nextId = $statement[0]->Auto_increment;
+            // Where username or email is existing and is_deleted = true
+            $user = User::where(function($query) use ($validated) {
+                $query->where('username', strtoupper(trim($validated['username'])))
+                      ->orWhere('email', strtoupper(trim($validated['email'])));
+            })->where('is_deleted', true)->first();
 
-            if($request->hasFile('profile_pic')){
-                $ext = $request->file('profile_pic')->extension();
-                $request->file('profile_pic')->storeAs('profile_pic', $nextId.".".$ext ,'public');
-                $filename = $nextId.".".$ext;
+
+            // If existing user is found, update the existing record instead of creating a new one
+            if($user){
+
+                if($request->hasFile('profile_pic')){
+                    $ext = $request->file('profile_pic')->extension();
+                    $request->file('profile_pic')->storeAs('profile_pic', $user->id.".".$ext ,'public');
+                    $filename = $user->id.".".$ext;
+                } else {
+                    $filename = "default.png";
+                }
+
+                $user->username = strtoupper(trim($validated['username']));
+                $user->usertype = $validated['usertype'];
+                $user->fname = strtoupper(trim($validated['fname']));
+                $user->mname = strtoupper(trim($validated['mname']));
+                $user->lname = strtoupper(trim($validated['lname']));
+                $user->email = strtoupper(trim($validated['email']));
+                $user->birthdate = $validated['birthdate'];
+                $user->contact_num = $validated['contact_num'];
+                $user->profile_pic = $filename;
+                $user->password = Hash::make($validated['password']);
+                $user->status = "ACTIVE";
+                $user->is_deleted = false;
+                $user->save();
+
             } else {
-                $filename = "default.png";
+
+                // Get Next Auto Increment
+                $statement = DB::select("SHOW TABLE STATUS LIKE 'users'");
+                $nextId = $statement[0]->Auto_increment;
+
+                if($request->hasFile('profile_pic')){
+                    $ext = $request->file('profile_pic')->extension();
+                    $request->file('profile_pic')->storeAs('profile_pic', $nextId.".".$ext ,'public');
+                    $filename = $nextId.".".$ext;
+                } else {
+                    $filename = "default.png";
+                }
+
+                // Save Request Data
+                $user = new User();
+
+                $user->username = strtoupper(trim($validated['username']));
+                $user->usertype = $validated['usertype'];
+                $user->fname = strtoupper(trim($validated['fname']));
+                $user->mname = strtoupper(trim($validated['mname']));
+                $user->lname = strtoupper(trim($validated['lname']));
+                $user->email = strtoupper(trim($validated['email']));
+                $user->birthdate = $validated['birthdate'];
+                $user->contact_num = $validated['contact_num'];
+                $user->profile_pic = $filename;
+                $user->password = Hash::make($validated['password']);
+                $user->status = "ACTIVE";
+
+                $user->save();
+
             }
 
-            // Save Request Data
-            $contents = new User();
-
-            $contents->username = $validated['username'];
-            $contents->usertype = $validated['usertype'];
-            $contents->fname = $validated['fname'];
-            $contents->mname = $validated['mname'];
-            $contents->lname = $validated['lname'];
-            $contents->email = $validated['email'];
-            $contents->birthdate = $validated['birthdate'];
-            $contents->contact_num = $validated['contact_num'];
-            $contents->profile_pic = $filename;
-            $contents->password = $validated['password'];
-
-            $contents->save();
-
             // Back to View
-            return redirect('/user-accounts')->with("success_msg", $contents->code." User Created Successfully");
+            return redirect('/user-accounts')->with("success_msg", $user->code." User Created Successfully");
 
         } else {
             return redirect('/');
@@ -171,9 +209,27 @@ class UserController extends Controller
     {
         if(auth()->check()){
 
-            // Destroy Request Data
-            User::where("id", $request->input("id"))->delete();
-            return redirect('/user-accounts')->with("success_msg", "Deleted Successfully");
+            // Confirm if User Accounts have related records in other tables before deleting
+            // Find in Collection and Check if the user id exists in the collection
+            $userId = $request->input('id');
+            $hasRelatedRecords = 
+                DB::table('entries')->where('agent_id', $userId)->exists() ||
+                DB::table('members_program')->where('agent_id', $userId)->exists() ||
+                DB::table('members')->where('agent_id', $userId)->exists() ||
+                DB::table('reports')->where('user_id', $userId)->exists();
+
+            if ($hasRelatedRecords) {
+                return redirect('/user-accounts')->with("error_msg", "Cannot delete user with related record to either Collection, New Sales, Members, or Reports. Set user to Inactive Instead.");
+            }
+
+            // Delete User Account
+            $user = User::find($userId);
+            $fname = $user->fname;
+            $lname = $user->lname;
+            $user->is_deleted = true;
+            $user->save();
+
+            return redirect('/user-accounts')->with("success_msg", $fname." ".$lname." Deleted Successfully");
 
         } else {
             return redirect('/');

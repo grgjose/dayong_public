@@ -190,7 +190,7 @@ class ExcelCollectionController extends Controller
 
                 // Check if Marketting Agent in the User List
                 // If not, Create Default User for Agent
-                $name = ucwords(strtolower(trim($toImport->marketting_agent)), " .");
+                $name = ucwords(strtoupper(trim($toImport->marketting_agent)), " .");
                 if(strpos($name, ",") > 0){
                     $tmp = explode(",", $name);
                     $fname = ucwords($tmp[1]);
@@ -211,10 +211,10 @@ class ExcelCollectionController extends Controller
                     // Save User Data
                     $newuser = new User();
 
-                    $newuser->username = strtolower($lname);
+                    $newuser->username = strtoupper(trim($fname)) . "." . strtoupper(trim($lname));
                     $newuser->usertype = 3;
-                    $newuser->fname = $fname;
-                    $newuser->lname = $lname;
+                    $newuser->fname = strtoupper(trim($fname));
+                    $newuser->lname = strtoupper(trim($lname));
                     $newuser->profile_pic = "default.png";
                     $newuser->password = "password";
 
@@ -392,10 +392,10 @@ class ExcelCollectionController extends Controller
         }
 
         return [
-            'fname' => $firstName,
-            'mname' => $middleName,
-            'lname' => $lastName,
-            'ext' => $nameExtension
+            'fname' => strtoupper(trim($firstName)),
+            'mname' => strtoupper(trim($middleName)),
+            'lname' => strtoupper(trim($lastName)),
+            'ext'   => strtoupper(trim($nameExtension)),
         ];
     }
 

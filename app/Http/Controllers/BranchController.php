@@ -117,6 +117,20 @@ class BranchController extends Controller
     {
         if(auth()->check()){
 
+            // Confirm if Branches have related records in other tables before deleting
+            // Find in Collection and Check if the branch id exists in the collection
+            $branchId = $request->input('id');
+            $hasRelatedRecords = 
+                DB::table('entries')->where('branch_id', $branchId)->exists() ||
+                DB::table('members_program')->where('branch_id', $branchId)->exists() ||
+                DB::table('members')->where('branch_id', $branchId)->exists() ||
+                DB::table('users')->where('branch_id', $branchId)->exists() ||
+                DB::table('fidelity')->where('branch_id', $branchId)->exists();
+
+            if ($hasRelatedRecords) {
+                return redirect('/branch')->with("error_msg", "Cannot delete branch with related record to either Collection, New Sales, Members, Users, or Fidelity. Set branch to Inactive Instead.");
+             }
+
             // Destroy Request Data
             $contents = Branch::find($request->id);
             $contents->is_deleted = true;
