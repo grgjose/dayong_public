@@ -436,7 +436,7 @@ class DatabaseSeeder extends Seeder
                 ]);
 
                 // --- Monthly Collection Entries (13 months starting May 2025) ---
-                $termMax    = (int) ($program->term_max ?? 13);
+                $termMax    = (int) (13);
                 $paymentDay = rand(1, 28);
 
                 for ($m = 0; $m < $termMax; $m++) {
