@@ -18,6 +18,7 @@ return new class extends Migration
             $table->dateTime("date_remitted")->nullable();
             $table->integer("amount")->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

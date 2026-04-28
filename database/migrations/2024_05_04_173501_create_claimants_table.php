@@ -20,7 +20,9 @@ return new class extends Migration
             $table->timestamp("birthdate")->nullable();
             $table->string("sex")->nullable();
             $table->string("contact_num")->nullable();
+            $table->string("relationship")->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

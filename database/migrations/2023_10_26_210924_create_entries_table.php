@@ -35,6 +35,7 @@ return new class extends Migration
             $table->boolean("is_remitted");
             $table->string("remarks")->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

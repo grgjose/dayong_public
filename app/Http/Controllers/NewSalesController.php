@@ -76,8 +76,8 @@ class NewSalesController extends Controller
 
             $my_user = auth()->user();
             $users = DB::table('users')->orderBy('usertype', 'asc')->get();
-            $members = DB::table('members')->orderBy('created_at', 'desc')->where('is_deleted', false)->get();
-            $members_program = DB::table('members_program')->where('is_deleted', false)->get();
+            $members = DB::table('members')->orderBy('created_at', 'desc')->where('deleted_at', null)->get();
+            $members_program = DB::table('members_program')->where('deleted_at', null)->get();
             $programs = DB::table('programs')->orderBy('code')->get();
             $branches = DB::table('branches')->orderBy('branch')->get();
 
@@ -599,8 +599,8 @@ class NewSalesController extends Controller
     {
         $my_user = auth()->user();
         $member_program = DB::table('members_program')->where('id', $id)->get()[0];
-        $member = DB::table('members')->where('id', $member_program->member_id)->where('is_deleted', false)->get();
-        $members = DB::table('members')->where('is_deleted', false)->get();
+        $member = DB::table('members')->where('id', $member_program->member_id)->where('deleted_at', null)->get();
+        $members = DB::table('members')->where('deleted_at', null)->get();
         $branches = DB::table('branches')->where('id', $member_program->branch_id)->get()[0];
         $programs = DB::table('programs')->where('id', $member_program->program_id)->get()[0];
         $users = DB::table('users')->where('usertype', 3)->get();
@@ -644,8 +644,8 @@ class NewSalesController extends Controller
     {
         $my_user = auth()->user();
         $member_program = DB::table('members_program')->where('id', $id)->get()[0];
-        $member = DB::table('members')->where('id', $member_program->member_id)->where('is_deleted', false)->get();
-        $members = DB::table('members')->where('is_deleted', false)->get();
+        $member = DB::table('members')->where('id', $member_program->member_id)->where('deleted_at', null)->get();
+        $members = DB::table('members')->where('deleted_at', null)->get();
         $branches = DB::table('branches')->get();
         $programs = DB::table('programs')->get();
         $users = DB::table('users')->where('usertype', 3)->get();

@@ -14,6 +14,7 @@ use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\MatrixController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\CashflowController;
 use App\Http\Middleware\ValidateOfficeHours;
 use Illuminate\Support\Facades\Route;
 
@@ -79,6 +80,19 @@ Route::post('/members/check-email', [MemberController::class, 'checkEmail'])
     ->name('members.checkEmail');
 Route::post('/members/check-app-no', [MemberController::class, 'checkAppNo'])
     ->name('members.checkAppNo');
+
+// Cashflow — main page
+Route::get('/expenses', [CashflowController::class, 'index'])->middleware(ValidateOfficeHours::class);
+ 
+// Cashflow — Remittances CRUD
+Route::post('/expenses/remittance/store',       [CashflowController::class, 'storeRemittance'])->middleware(ValidateOfficeHours::class);
+Route::put('/expenses/remittance/update/{id}',  [CashflowController::class, 'updateRemittance'])->middleware(ValidateOfficeHours::class);
+Route::post('/expenses/remittance/destroy',     [CashflowController::class, 'destroyRemittance'])->middleware(ValidateOfficeHours::class);
+ 
+// Cashflow — Expenses CRUD
+Route::post('/expenses/expense/store',          [CashflowController::class, 'storeExpense'])->middleware(ValidateOfficeHours::class);
+Route::put('/expenses/expense/update/{id}',     [CashflowController::class, 'updateExpense'])->middleware(ValidateOfficeHours::class);
+Route::post('/expenses/expense/destroy',        [CashflowController::class, 'destroyExpense'])->middleware(ValidateOfficeHours::class);
 
 
 Route::get('/audit', [AuditController::class, 'index'])->middleware(ValidateOfficeHours::class);

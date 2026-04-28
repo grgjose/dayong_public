@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string("address")->nullable();
             $table->string("description")->nullable();
             $table->string("status")->default('active')->nullable();
-            $table->boolean("is_deleted")->default(false);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -53,6 +53,7 @@ return new class extends Migration
             $table->string("remarks")->nullable();
             $table->boolean("isImported")->default(false)->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

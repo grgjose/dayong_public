@@ -30,9 +30,9 @@ return new class extends Migration
             $table->string("branch_id")->nullable();
             $table->string("claimant_id")->nullable();
             $table->string("status")->nullable();
-            $table->boolean("is_deleted")->nullable()->default(false);
             $table->integer("lastUpdatedBy")->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

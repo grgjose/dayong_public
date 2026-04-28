@@ -21,8 +21,8 @@ class UserController extends Controller
             $users = DB::table('users')
                 ->join('usertypes', 'users.usertype', '=', 'usertypes.id')
                 ->select('users.*', 'usertypes.usertype as usertype_name')
+                ->whereNull('users.deleted_at')
                 ->orderBy('users.id')
-                ->where('users.is_deleted', false)
                 ->get();
 
             return view('main', [
@@ -71,12 +71,13 @@ class UserController extends Controller
                 "password" => ['nullable'],
             ]);
 
-            // Where username or email is existing and is_deleted = true
-            $user = User::where(function($query) use ($validated) {
-                $query->where('username', strtoupper(trim($validated['username'])))
-                      ->orWhere('email', strtoupper(trim($validated['email'])));
-            })->where('is_deleted', true)->first();
-
+            // Where username or email is existing and deleted
+            $user = User::onlyTrashed()
+                ->where(function ($query) use ($validated) {
+                    $query->where('username', strtoupper(trim($validated['username'])))
+                        ->orWhere('email', strtoupper(trim($validated['email'])));
+                })
+                ->first();
 
             // If existing user is found, update the existing record instead of creating a new one
             if($user){
@@ -100,7 +101,6 @@ class UserController extends Controller
                 $user->profile_pic = $filename;
                 $user->password = Hash::make($validated['password']);
                 $user->status = "ACTIVE";
-                $user->is_deleted = false;
                 $user->save();
 
             } else {
@@ -226,8 +226,7 @@ class UserController extends Controller
             $user = User::find($userId);
             $fname = $user->fname;
             $lname = $user->lname;
-            $user->is_deleted = true;
-            $user->save();
+            $user->delete();
 
             return redirect('/user-accounts')->with("success_msg", $fname." ".$lname." Deleted Successfully");
 

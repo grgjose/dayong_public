@@ -18,7 +18,7 @@ class ProgramController extends Controller
         if(auth()->check()){
 
             $my_user = auth()->user();
-            $programs = DB::table('programs')->orderBy('id')->where('is_deleted', false)->get();
+            $programs = DB::table('programs')->orderBy('id')->where('deleted_at', null)->get();
 
             return view('main', [
                 'my_user' => $my_user,
@@ -56,7 +56,6 @@ class ProgramController extends Controller
             $contents->age_max = $validated['age_max'];
             $contents->ben_age_min = $validated['ben_age_min'];
             $contents->ben_age_max = $validated['ben_age_max'];
-            $contents->is_deleted = false;
 
             $contents->save();
 
@@ -93,7 +92,6 @@ class ProgramController extends Controller
             $contents->ben_age_min = $validated['ben_age_min'];
             $contents->ben_age_max = $validated['ben_age_max'];
             $contents->updated_at = date('Y-m-d G:i:s');
-            $contents->is_deleted = false;
 
             $contents->save();
 
@@ -110,8 +108,7 @@ class ProgramController extends Controller
 
             // Destroy Request Data
             $contents = Program::find($request->id);
-            $contents->is_deleted = true;
-            $contents->save();
+            $contents->delete();
             return redirect('/program')->with("success_msg", "Deleted Successfully");
 
         } else {

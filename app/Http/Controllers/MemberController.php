@@ -76,7 +76,7 @@ class MemberController extends Controller
 
             $my_user = auth()->user();
             $users = DB::table('users')->orderBy('usertype', 'asc')->get();
-            $members = DB::table('members')->where('is_deleted', false)->orderBy('created_at', 'desc')->get();
+            $members = DB::table('members')->where('deleted_at', null)->orderBy('created_at', 'desc')->get();
             $programs = DB::table('programs')->orderBy('code')->get();
             $branches = DB::table('branches')->orderBy('branch')->get();
 
@@ -441,16 +441,16 @@ class MemberController extends Controller
 
             $memberProgramId = DB::table('members_program')
             ->where('member_id', $request->input("id"))
-            ->where('is_deleted', false)->get();
+            ->where('deleted_at', null)->get();
 
             // Destroy Request Data (Soft Delete)
             $member = Member::find($request->input("id"));
-            $member->is_deleted = true;
+            $member->delete();
             $member->save();
 
             if(count($memberProgramId) > 0){
                 $memberProgram = MembersProgram::find($memberProgramId[0]->id);
-                $memberProgram->is_deleted = true;
+                $memberProgram->delete();
                 $memberProgram->save();
             }
 

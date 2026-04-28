@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('beneficiary_id')->constrained()->cascadeOnDelete();
             $table->string('relationship')->nullable(); // optional if relationship differs per member
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique(['member_id', 'beneficiary_id']); // prevents duplicate attach
         });

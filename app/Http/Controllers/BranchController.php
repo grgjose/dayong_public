@@ -22,7 +22,7 @@ class BranchController extends Controller
         if(auth()->check()){
 
             $my_user = auth()->user();
-            $branches = DB::table('branches')->orderBy('id')->where('is_deleted', false)->get();
+            $branches = DB::table('branches')->orderBy('id')->where('deleted_at', null)->get();
 
             return view('main', [
                 'my_user' => $my_user,
@@ -60,7 +60,6 @@ class BranchController extends Controller
             $contents->branch = $validated['branch'];
             $contents->address = $validated['address'];
             $contents->description = $validated['description'];
-            $contents->is_deleted = false;
 
             $contents->save();
 
@@ -98,8 +97,6 @@ class BranchController extends Controller
             $contents->address = $validated['address'];
             $contents->description = $validated['description'];
             $contents->updated_at = date('Y-m-d G:i:s');
-            $contents->is_deleted = false;
-
             $contents->save();
 
             // Back to View
@@ -133,8 +130,8 @@ class BranchController extends Controller
 
             // Destroy Request Data
             $contents = Branch::find($request->id);
-            $contents->is_deleted = true;
-            $contents->save();
+            $contents->delete();
+            
             return redirect('/branch')->with("success_msg", "Deleted Successfully");
 
         } else {

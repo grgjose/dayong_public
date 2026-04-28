@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('usertype')->unique();
             $table->text('access')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

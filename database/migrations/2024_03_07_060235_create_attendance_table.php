@@ -17,6 +17,7 @@ return new class extends Migration
             $table->timestamp("time_in")->nullable();
             $table->timestamp("time_out")->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

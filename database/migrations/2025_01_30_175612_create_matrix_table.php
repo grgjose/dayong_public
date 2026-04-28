@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer("percentage");
             $table->boolean("is_reactivated");
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

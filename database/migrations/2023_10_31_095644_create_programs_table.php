@@ -28,8 +28,8 @@ return new class extends Migration
             $table->decimal("amount_min", 15, 2)->nullable();
             $table->decimal("amount_max", 15, 2)->nullable();
             $table->string("status")->nullable(); // Active, Inactive
-            $table->string('is_deleted')->default(false);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
