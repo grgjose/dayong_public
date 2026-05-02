@@ -69,6 +69,7 @@
                                     <th>Amount</th>
                                     <th>Encoded By</th>
                                     <th>Remarks</th>
+                                    <th>Attachments</th>
                                     @if($my_user->usertype != 3)
                                         <th>Action</th>
                                     @endif
@@ -107,6 +108,17 @@
                                             @endforeach
                                         </td>
                                         <td>{{ $r->remarks ?? '—' }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-secondary"
+                                                onclick="openAttachmentModal('remittance', {{ $r->id }}, {{ $r->attachments->count() }})"
+                                                data-toggle="modal"
+                                                data-target="#AttachmentModal">
+                                                <span class="fas fa-paperclip"></span>
+                                                @if($r->attachments->count() > 0)
+                                                    <span class="badge badge-info">{{ $r->attachments->count() }}</span>
+                                                @endif
+                                            </button>
+                                        </td>
                                         @if($my_user->usertype != 3)
                                             <td>
                                                 <button class="btn btn-sm btn-outline-primary"
@@ -170,6 +182,7 @@
                                     <th>Amount</th>
                                     <th>Encoded By</th>
                                     <th>Remarks</th>
+                                    <th>Attachments</th>
                                     @if($my_user->usertype != 3)
                                         <th>Action</th>
                                     @endif
@@ -214,6 +227,17 @@
                                             @endforeach
                                         </td>
                                         <td>{{ $e->remarks ?? '—' }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-secondary"
+                                                onclick="openAttachmentModal('expense', {{ $e->id }}, {{ $e->attachments->count() }})"
+                                                data-toggle="modal"
+                                                data-target="#AttachmentModal">
+                                                <span class="fas fa-paperclip"></span>
+                                                @if($e->attachments->count() > 0)
+                                                    <span class="badge badge-danger">{{ $e->attachments->count() }}</span>
+                                                @endif
+                                            </button>
+                                        </td>
                                         @if($my_user->usertype != 3)
                                             <td>
                                                 <button class="btn btn-sm btn-outline-primary"
@@ -269,7 +293,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label>Branch <span class="text-danger">*</span></label>
-                            <select class="form-control" name="branch_id" required>
+                            <select class="form-control chosen-select" name="branch_id" required>
                                 <option value="">-- Select Branch --</option>
                                 @foreach($branches as $b)
                                     <option value="{{ $b->id }}">{{ strtoupper($b->branch) }}</option>
@@ -357,7 +381,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label>Branch <span class="text-danger">*</span></label>
-                            <select class="form-control" id="edit_rem_branch_id" name="branch_id" required>
+                            <select class="form-control chosen-select" id="edit_rem_branch_id" name="branch_id" required>
                                 <option value="">-- Select Branch --</option>
                                 @foreach($branches as $b)
                                     <option value="{{ $b->id }}">{{ strtoupper($b->branch) }}</option>
@@ -372,7 +396,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label>MAS (Agent)</label>
-                            <select class="form-control" id="edit_rem_mas_id" name="mas_id">
+                            <select class="form-control chosen-select" id="edit_rem_mas_id" name="mas_id">
                                 <option value="">-- Select MAS or type name below --</option>
                                 @foreach($users as $u)
                                     @if($u->usertype == 3)
@@ -389,7 +413,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-4">
                             <label>Transaction Type <span class="text-danger">*</span></label>
-                            <select class="form-control" id="edit_rem_type" name="transaction_type" onchange="toggleRemittanceFields('edit')" required>
+                            <select class="form-control chosen-select" id="edit_rem_type" name="transaction_type" onchange="toggleRemittanceFields('edit')" required>
                                 <option value="bank">Bank Transfer</option>
                                 <option value="gcash">GCash</option>
                             </select>
@@ -470,7 +494,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label>Branch <span class="text-danger">*</span></label>
-                            <select class="form-control" name="branch_id" required>
+                            <select class="form-control chosen-select" name="branch_id" required>
                                 <option value="">-- Select Branch --</option>
                                 @foreach($branches as $b)
                                     <option value="{{ $b->id }}">{{ strtoupper($b->branch) }}</option>
@@ -552,7 +576,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label>Branch <span class="text-danger">*</span></label>
-                            <select class="form-control" id="edit_exp_branch_id" name="branch_id" required>
+                            <select class="form-control chosen-select" id="edit_exp_branch_id" name="branch_id" required>
                                 <option value="">-- Select Branch --</option>
                                 @foreach($branches as $b)
                                     <option value="{{ $b->id }}">{{ strtoupper($b->branch) }}</option>
@@ -577,7 +601,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label>MAS (Agent) <small class="text-muted">— optional</small></label>
-                            <select class="form-control" id="edit_exp_mas_id" name="mas_id">
+                            <select class="form-control chosen-select" id="edit_exp_mas_id" name="mas_id">
                                 <option value="">-- None --</option>
                                 @foreach($users as $u)
                                     @if($u->usertype == 3)
@@ -588,7 +612,7 @@
                         </div>
                         <div class="form-group col-md-6">
                             <label>Member (Burial Assistance) <small class="text-muted">— optional</small></label>
-                            <select class="form-control" id="edit_exp_member_id" name="member_id">
+                            <select class="form-control chosen-select" id="edit_exp_member_id" name="member_id">
                                 <option value="">-- None --</option>
                                 @foreach($members as $m)
                                     <option value="{{ $m->id }}">{{ strtoupper($m->lname.', '.$m->fname) }}</option>
@@ -642,72 +666,170 @@
     </div>
 </div>
 
+{{-- ====================================================================
+     MODAL: ATTACHMENTS
+     Used for both Remittances and Expenses.
+     The JS function openAttachmentModal() populates it dynamically.
+==================================================================== --}}
+<div class="modal fade" id="AttachmentModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary">
+                <h5 class="modal-title text-white">
+                    <span class="fas fa-paperclip"></span> Attachments
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+ 
+                {{-- Upload Form --}}
+                <form id="attachmentUploadForm" action="/expenses/attachment/store" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    {{-- These hidden inputs are set by JS when the modal opens --}}
+                    <input type="hidden" id="att_attachable_type" name="attachable_type">
+                    <input type="hidden" id="att_attachable_id"   name="attachable_id">
+ 
+                    <div class="form-group">
+                        <label><strong>Upload New File(s)</strong> <small class="text-muted">(max 10 MB each)</small></label>
+                        <div class="input-group">
+                            <div class="custom-file">
+                                <input type="file"
+                                    class="custom-file-input"
+                                    id="att_files"
+                                    name="files[]"
+                                    multiple
+                                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar">
+                                <label class="custom-file-label" for="att_files">Choose file(s)...</label>
+                            </div>
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-secondary">
+                                    <span class="fas fa-upload"></span> Upload
+                                </button>
+                            </div>
+                        </div>
+                        <small class="form-text text-muted">Accepted: images, PDF, Word, Excel, ZIP/RAR</small>
+                    </div>
+                </form>
+ 
+                <hr>
+ 
+                {{-- Existing Attachments List --}}
+                <h6 class="mb-2"><strong>Existing Attachments</strong></h6>
+                <div id="attachmentList">
+                    {{-- Populated dynamically by JS based on attachable_type + attachable_id --}}
+                    <p class="text-muted" id="noAttachmentsMsg">No attachments yet.</p>
+                </div>
+ 
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {{-- ====================================================================
-     JAVASCRIPT
+     MODAL: DELETE ATTACHMENT (inline confirmation)
 ==================================================================== --}}
+<div class="modal fade" id="DeleteAttachmentModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger">
+                <h5 class="modal-title text-white">Delete Attachment</h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <form id="deleteAttachmentForm" action="/expenses/attachment/destroy" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <p>Are you sure you want to delete <strong id="del_att_name"></strong>?</p>
+                    <input type="hidden" id="del_att_id" name="id">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+ 
+{{--
+─────────────────────────────────────────────────────────────────────────────────
+SECTION F — JavaScript additions
+ADD these functions inside the <script> block (or in scripts.blade.php
+wherever the cashflow JS lives now).
+─────────────────────────────────────────────────────────────────────────────────
+--}}
+
 <script>
-
-    // ── DataTables Init ──────────────────────────────────────────────────
-    $(document).ready(function () {
-        $('#remittanceTable').DataTable({ order: [[1, 'desc']] });
-        $('#expenseTable').DataTable({ order: [[1, 'desc']] });
-
-        // Re-init chosen selects inside modals when they open
-        $('.modal').on('shown.bs.modal', function () {
-            $(this).find('.chosen-select').chosen({ width: '100%' });
-        });
-    });
-
-    // ── Toggle Bank / GCash fields ───────────────────────────────────────
-    function toggleRemittanceFields(prefix) {
-        var type = $('#' + prefix + '_rem_type').val();
-        if (type === 'bank') {
-            $('#' + prefix + '_bank_name_group').show();
-            $('#' + prefix + '_gcash_number_group').hide();
+    // ── Attachment data passed from Blade (keyed by type:id) ────────────────────
+    // We build a JS lookup object from the server-rendered data so we can
+    // populate the attachment list without an AJAX call.
+    var attachmentData = {
+        @foreach($remittances as $r)
+            'remittance:{{ $r->id }}': [
+                @foreach($r->attachments as $att)
+                {
+                    id: {{ $att->id }},
+                    name: '{{ addslashes($att->original_name) }}',
+                    url: '{{ url("/expenses/attachment/".$att->id) }}'
+                },
+                @endforeach
+            ],
+        @endforeach
+        @foreach($expenses as $e)
+            'expense:{{ $e->id }}': [
+                @foreach($e->attachments as $att)
+                {
+                    id: {{ $att->id }},
+                    name: '{{ addslashes($att->original_name) }}',
+                    url: '{{ url("/expenses/attachment/".$att->id) }}'
+                },
+                @endforeach
+            ],
+        @endforeach
+    };
+    
+    // ── Open Attachment Modal ────────────────────────────────────────────────────
+    function openAttachmentModal(type, id, count) {
+        // Set hidden inputs for the upload form
+        $('#att_attachable_type').val(type);
+        $('#att_attachable_id').val(id);
+    
+        // Render the existing attachments list
+        var key   = type + ':' + id;
+        var files = attachmentData[key] || [];
+        var list  = $('#attachmentList');
+        list.empty();
+    
+        if (files.length === 0) {
+            list.html('<p class="text-muted">No attachments yet.</p>');
         } else {
-            $('#' + prefix + '_bank_name_group').hide();
-            $('#' + prefix + '_gcash_number_group').show();
+            var html = '<ul class="list-group">';
+            files.forEach(function(f) {
+                html += '<li class="list-group-item d-flex justify-content-between align-items-center">'
+                    +   '<span><span class="fas fa-file mr-2 text-muted"></span>'
+                    +     '<a href="' + f.url + '" target="_blank">' + f.name + '</a>'
+                    +   '</span>'
+                    +   '<button class="btn btn-sm btn-outline-danger" '
+                    +     'onclick="confirmDeleteAttachment(' + f.id + ', \'' + f.name.replace(/'/g, "\\'") + '\')"'
+                    +     ' data-toggle="modal" data-target="#DeleteAttachmentModal">'
+                    +     '<span class="fas fa-trash"></span>'
+                    +   '</button>'
+                    + '</li>';
+            });
+            html += '</ul>';
+            list.html(html);
         }
+    
+        // Reset the file input label
+        $('#att_files').val('');
+        $('.custom-file-label').text('Choose file(s)...');
     }
-
-    // ── Remittance: Populate Edit Modal ──────────────────────────────────
-    function remittanceEditFunction(id, branch_id, mas_id, mas_name, type, amount, bank_name, gcash_number, ref_no, date, remarks) {
-        $('#editRemittanceForm').attr('action', '/expenses/remittance/update/' + id);
-        $('#edit_rem_branch_id').val(branch_id);
-        $('#edit_rem_mas_id').val(mas_id);
-        $('#edit_rem_mas_name').val(mas_name);
-        $('#edit_rem_type').val(type);
-        $('#edit_rem_amount').val(amount);
-        $('#edit_rem_bank_name').val(bank_name);
-        $('#edit_rem_gcash_number').val(gcash_number);
-        $('#edit_rem_reference').val(ref_no);
-        $('#edit_rem_date').val(date);
-        $('#edit_rem_remarks').val(remarks);
-        toggleRemittanceFields('edit');
+    
+    // ── Confirm Delete Attachment ────────────────────────────────────────────────
+    function confirmDeleteAttachment(id, name) {
+        $('#del_att_id').val(id);
+        $('#del_att_name').text(name);
     }
-
-    // ── Remittance: Populate Delete Modal ────────────────────────────────
-    function remittanceDeleteFunction(id) {
-        $('#delete_rem_id').val(id);
-    }
-
-    // ── Expense: Populate Edit Modal ─────────────────────────────────────
-    function expenseEditFunction(id, branch_id, mas_id, member_id, type_of_expense, receipt_number, amount, date, remarks) {
-        $('#editExpenseForm').attr('action', '/expenses/expense/update/' + id);
-        $('#edit_exp_branch_id').val(branch_id);
-        $('#edit_exp_mas_id').val(mas_id);
-        $('#edit_exp_member_id').val(member_id);
-        $('#edit_exp_type').val(type_of_expense);
-        $('#edit_exp_receipt').val(receipt_number);
-        $('#edit_exp_amount').val(amount);
-        $('#edit_exp_date').val(date);
-        $('#edit_exp_remarks').val(remarks);
-    }
-
-    // ── Expense: Populate Delete Modal ───────────────────────────────────
-    function expenseDeleteFunction(id) {
-        $('#delete_exp_id').val(id);
-    }
-
 </script>

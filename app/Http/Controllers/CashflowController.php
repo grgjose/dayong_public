@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Remittance;
 use App\Models\Expense;
+use App\Models\CashflowAttachment;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class CashflowController extends Controller
 {
@@ -19,19 +21,21 @@ class CashflowController extends Controller
             return redirect('/');
         }
  
-        $my_user   = auth()->user();
-        $branches  = DB::table('branches')->orderBy('branch')->get();
-        $users     = DB::table('users')->orderBy('id')->get();
-        $members   = DB::table('members')->where('deleted_at', null)->orderBy('lname')->get();
+        $my_user  = auth()->user();
+        $branches = DB::table('branches')->orderBy('branch')->get();
+        $users    = DB::table('users')->orderBy('id')->get();
+        $members  = DB::table('members')->where('deleted_at', null)->orderBy('lname')->get();
  
-        $remittances = DB::table('remittances')
-            ->where('deleted_at', null)
+        // Load remittances with their attachments (Eloquent so morphMany works)
+        $remittances = Remittance::whereNull('deleted_at')
             ->orderBy('created_at', 'desc')
+            ->with('attachments')
             ->get();
  
-        $expenses = DB::table('expenses')
-            ->where('deleted_at', null)
+        // Load expenses with their attachments
+        $expenses = Expense::whereNull('deleted_at')
             ->orderBy('created_at', 'desc')
+            ->with('attachments')
             ->get();
  
         return view('main', [
@@ -155,14 +159,14 @@ class CashflowController extends Controller
         }
  
         $validated = $request->validate([
-            'branch_id'       => ['required'],
-            'mas_id'          => ['nullable'],
-            'member_id'       => ['nullable'],
-            'type_of_expense' => ['required', 'string', 'max:255'],
-            'receipt_number'  => ['nullable', 'string', 'max:255'],
-            'amount'          => ['required', 'numeric', 'min:0'],
-            'transaction_date'=> ['required', 'date'],
-            'remarks'         => ['nullable', 'string', 'max:500'],
+            'branch_id'        => ['required'],
+            'mas_id'           => ['nullable'],
+            'member_id'        => ['nullable'],
+            'type_of_expense'  => ['required', 'string', 'max:255'],
+            'receipt_number'   => ['nullable', 'string', 'max:255'],
+            'amount'           => ['required', 'numeric', 'min:0'],
+            'transaction_date' => ['required', 'date'],
+            'remarks'          => ['nullable', 'string', 'max:500'],
         ]);
  
         $my_user = auth()->user();
@@ -193,14 +197,14 @@ class CashflowController extends Controller
         }
  
         $validated = $request->validate([
-            'branch_id'       => ['required'],
-            'mas_id'          => ['nullable'],
-            'member_id'       => ['nullable'],
-            'type_of_expense' => ['required', 'string', 'max:255'],
-            'receipt_number'  => ['nullable', 'string', 'max:255'],
-            'amount'          => ['required', 'numeric', 'min:0'],
-            'transaction_date'=> ['required', 'date'],
-            'remarks'         => ['nullable', 'string', 'max:500'],
+            'branch_id'        => ['required'],
+            'mas_id'           => ['nullable'],
+            'member_id'        => ['nullable'],
+            'type_of_expense'  => ['required', 'string', 'max:255'],
+            'receipt_number'   => ['nullable', 'string', 'max:255'],
+            'amount'           => ['required', 'numeric', 'min:0'],
+            'transaction_date' => ['required', 'date'],
+            'remarks'          => ['nullable', 'string', 'max:500'],
         ]);
  
         $expense = Expense::findOrFail($id);
@@ -230,8 +234,95 @@ class CashflowController extends Controller
  
         $expense = Expense::findOrFail($request->input('id'));
         $expense->delete();
-        $expense->save();
  
         return redirect('/expenses')->with('success_msg', 'Expense deleted successfully.');
+    }
+ 
+    // =========================================================================
+    // ATTACHMENTS — STORE
+    // Accepts multiple files and links them to a remittance or expense.
+    // =========================================================================
+ 
+    public function storeAttachment(Request $request)
+    {
+        if (!auth()->check()) {
+            return redirect('/');
+        }
+ 
+        $request->validate([
+            'attachable_type' => ['required', 'in:remittance,expense'],
+            'attachable_id'   => ['required', 'integer'],
+            'files'           => ['required', 'array', 'min:1'],
+            'files.*'         => ['file', 'max:10240'], // 10 MB per file
+        ]);
+ 
+        $my_user       = auth()->user();
+        $type          = $request->input('attachable_type');
+        $id            = $request->input('attachable_id');
+        $modelClass    = $type === 'remittance' ? Remittance::class : Expense::class;
+        $morphType     = $type === 'remittance' ? 'App\Models\Remittance' : 'App\Models\Expense';
+ 
+        // Make sure the parent record exists
+        $modelClass::findOrFail($id);
+ 
+        foreach ($request->file('files') as $file) {
+            $originalName = $file->getClientOriginalName();
+            // Store in storage/app/public/cashflow_attachments/
+            $path = $file->store('cashflow_attachments', 'public');
+ 
+            CashflowAttachment::create([
+                'attachable_type' => $morphType,
+                'attachable_id'   => $id,
+                'file_path'       => $path,
+                'original_name'   => $originalName,
+                'uploaded_by'     => $my_user->id,
+            ]);
+        }
+ 
+        return redirect('/expenses')->with('success_msg', 'Attachment(s) uploaded successfully.');
+    }
+ 
+    // =========================================================================
+    // ATTACHMENTS — DESTROY
+    // Deletes one attachment record and removes the file from storage.
+    // =========================================================================
+ 
+    public function destroyAttachment(Request $request)
+    {
+        if (!auth()->check()) {
+            return redirect('/');
+        }
+ 
+        $attachment = CashflowAttachment::findOrFail($request->input('id'));
+ 
+        // Delete file from disk
+        Storage::disk('public')->delete($attachment->file_path);
+ 
+        // Soft-delete the record
+        $attachment->delete();
+ 
+        return redirect('/expenses')->with('success_msg', 'Attachment deleted successfully.');
+    }
+ 
+    // =========================================================================
+    // ATTACHMENTS — DOWNLOAD
+    // Streams the file to the browser as a download.
+    // =========================================================================
+ 
+    public function downloadAttachment($id)
+    {
+        if (!auth()->check()) {
+            return redirect('/');
+        }
+ 
+        $attachment = CashflowAttachment::findOrFail($id);
+ 
+        $fullPath = Storage::disk('public')->path($attachment->file_path);
+ 
+        if (!file_exists($fullPath)) {
+            abort(404, 'File not found.');
+        }
+ 
+        return response()->download($fullPath, $attachment->original_name);
     }
 }

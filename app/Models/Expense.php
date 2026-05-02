@@ -22,7 +22,14 @@ class Expense extends Model
         'amount',
         'transaction_date',
         'remarks',
-        'is_deleted',
     ];
+
+    /**
+     * All file attachments for this expense record.
+     */
+    public function attachments()
+    {
+        return $this->morphMany(CashflowAttachment::class, 'attachable');
+    }
 
 }

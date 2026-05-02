@@ -94,6 +94,10 @@ Route::post('/expenses/expense/store',          [CashflowController::class, 'sto
 Route::put('/expenses/expense/update/{id}',     [CashflowController::class, 'updateExpense'])->middleware(ValidateOfficeHours::class);
 Route::post('/expenses/expense/destroy',        [CashflowController::class, 'destroyExpense'])->middleware(ValidateOfficeHours::class);
 
+// Cashflow — Attachments
+Route::post('/expenses/attachment/store',    [CashflowController::class, 'storeAttachment'])->middleware(ValidateOfficeHours::class);
+Route::post('/expenses/attachment/destroy',  [CashflowController::class, 'destroyAttachment'])->middleware(ValidateOfficeHours::class);
+Route::get('/expenses/attachment/{id}',      [CashflowController::class, 'downloadAttachment'])->middleware(ValidateOfficeHours::class);
 
 Route::get('/audit', [AuditController::class, 'index'])->middleware(ValidateOfficeHours::class);
 Route::post('/audit/store', [AuditController::class, 'store'])->middleware(ValidateOfficeHours::class);
@@ -116,6 +120,7 @@ Route::get('/attendance', [AttendanceController::class, 'index'])->middleware(Va
 Route::post('/attendance/store', [AttendanceController::class, 'store'])->middleware(ValidateOfficeHours::class);
 Route::put('/attendance/update/{id}', [AttendanceController::class, 'update'])->middleware(ValidateOfficeHours::class);
 Route::post('/attendance/destroy', [AttendanceController::class, 'destroy'])->middleware(ValidateOfficeHours::class);
+Route::put('/attendance/admin-update/{id}', [AttendanceController::class, 'adminUpdate'])->middleware(ValidateOfficeHours::class);
 
 Route::get('/branch', [BranchController::class, 'index'])->middleware(ValidateOfficeHours::class);
 Route::post('/branch/store', [BranchController::class, 'store'])->middleware(ValidateOfficeHours::class);

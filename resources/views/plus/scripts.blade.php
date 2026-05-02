@@ -1501,3 +1501,73 @@
             }
         });
     </script>
+
+    {{-- ====================================================================
+        JAVASCRIPT
+    ==================================================================== --}}
+    <script>
+
+        // ── DataTables Init ──────────────────────────────────────────────────
+        $(document).ready(function () {
+            $('#remittanceTable').DataTable({ order: [[1, 'desc']] });
+            $('#expenseTable').DataTable({ order: [[1, 'desc']] });
+
+            // Re-init chosen selects inside modals when they open
+            $('.modal').on('shown.bs.modal', function () {
+                $(this).find('.chosen-select').chosen({ width: '100%' });
+            });
+        });
+
+        // ── Toggle Bank / GCash fields ───────────────────────────────────────
+        function toggleRemittanceFields(prefix) {
+            var type = $('#' + prefix + '_rem_type').val();
+            if (type === 'bank') {
+                $('#' + prefix + '_bank_name_group').show();
+                $('#' + prefix + '_gcash_number_group').hide();
+            } else {
+                $('#' + prefix + '_bank_name_group').hide();
+                $('#' + prefix + '_gcash_number_group').show();
+            }
+        }
+
+        // ── Remittance: Populate Edit Modal ──────────────────────────────────
+        function remittanceEditFunction(id, branch_id, mas_id, mas_name, type, amount, bank_name, gcash_number, ref_no, date, remarks) {
+            $('#editRemittanceForm').attr('action', '/expenses/remittance/update/' + id);
+            $('#edit_rem_branch_id').val(branch_id).trigger('chosen:updated'); // ← add trigger
+            $('#edit_rem_mas_id').val(mas_id).trigger('chosen:updated');
+            $('#edit_rem_mas_name').val(mas_name);
+            $('#edit_rem_type').val(type);
+            $('#edit_rem_amount').val(amount);
+            $('#edit_rem_bank_name').val(bank_name);
+            $('#edit_rem_gcash_number').val(gcash_number);
+            $('#edit_rem_reference').val(ref_no);
+            $('#edit_rem_date').val(date);
+            $('#edit_rem_remarks').val(remarks);
+            toggleRemittanceFields('edit');
+        }
+        
+        // ── Remittance: Populate Delete Modal ────────────────────────────────
+        function remittanceDeleteFunction(id) {
+            $('#delete_rem_id').val(id);
+        }
+
+        // ── Expense: Populate Edit Modal ─────────────────────────────────────
+        function expenseEditFunction(id, branch_id, mas_id, member_id, type_of_expense, receipt_number, amount, date, remarks) {
+            $('#editExpenseForm').attr('action', '/expenses/expense/update/' + id);
+            $('#edit_exp_branch_id').val(branch_id).trigger('chosen:updated'); // ← add trigger
+            $('#edit_exp_mas_id').val(mas_id).trigger('chosen:updated');
+            $('#edit_exp_member_id').val(member_id).trigger('chosen:updated');
+            $('#edit_exp_type').val(type_of_expense);
+            $('#edit_exp_receipt').val(receipt_number);
+            $('#edit_exp_amount').val(amount);
+            $('#edit_exp_date').val(date);
+            $('#edit_exp_remarks').val(remarks);
+        }
+
+        // ── Expense: Populate Delete Modal ───────────────────────────────────
+        function expenseDeleteFunction(id) {
+            $('#delete_exp_id').val(id);
+        }
+
+    </script>
+

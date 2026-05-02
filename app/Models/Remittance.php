@@ -24,6 +24,13 @@ class Remittance extends Model
         'reference_number',
         'transaction_date',
         'remarks',
-        'is_deleted',
     ];
+
+    /**
+     * All file attachments for this remittance record.
+     */
+    public function attachments()
+    {
+        return $this->morphMany(CashflowAttachment::class, 'attachable');
+    }
 }

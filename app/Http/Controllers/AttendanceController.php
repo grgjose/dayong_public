@@ -94,6 +94,42 @@ class AttendanceController extends Controller
     }
 
     /**
+     * Admin Override: Update any attendance record's time_in and/or time_out.
+     * Only accessible to usertype == 1 (admin).
+     */
+    public function adminUpdate(Request $request, $id)
+    {
+        if (!auth()->check()) {
+            return redirect('/');
+        }
+ 
+        // Only admins can use this
+        if (auth()->user()->usertype != 1) {
+            abort(403, 'Unauthorized.');
+        }
+ 
+        $validated = $request->validate([
+            'time_in'  => ['nullable', 'date_format:Y-m-d\TH:i'],  // datetime-local input format
+            'time_out' => ['nullable', 'date_format:Y-m-d\TH:i', 'after_or_equal:time_in'],
+        ]);
+ 
+        $attendance = Attendance::findOrFail($id);
+ 
+        // Convert from datetime-local format (Y-m-dTH:i) to MySQL timestamp format
+        $attendance->time_in  = $validated['time_in']
+            ? date('Y-m-d H:i:s', strtotime($validated['time_in']))
+            : $attendance->time_in;
+ 
+        $attendance->time_out = isset($validated['time_out']) && $validated['time_out'] !== null
+            ? date('Y-m-d H:i:s', strtotime($validated['time_out']))
+            : null;
+ 
+        $attendance->save();
+ 
+        return redirect('/attendance')->with('success_msg', 'Attendance record updated successfully.');
+    }
+
+    /**
      * Deletes Attendance Record
      */
     public function destroy(Request $request)

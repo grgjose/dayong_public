@@ -97,6 +97,9 @@
                                     <th>Full Name</th>
                                     <th>Time-In</th>
                                     <th>Time-Out</th>
+                                    @if($my_user->usertype == 1)
+                                        <th>Actions</th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -106,13 +109,26 @@
                                         <td>
                                             @foreach($users as $user)
                                                 @if($user->id == $attend->user_id)
-                                                    {{ $user->fname.' '.$user->mname.' '.$user->lname; }}
+                                                    {{ $user->fname.' '.$user->mname.' '.$user->lname }}
                                                 @endif
-                                            @endforeach  
+                                            @endforeach
                                         </td>
-                                        <td>{{ $attend->time_in; }}</td>
-                                        <td>{{ $attend->time_out; }}</td>
-
+                                        <td>{{ $attend->time_in }}</td>
+                                        <td>{{ $attend->time_out ?? '—' }}</td>
+                                        @if($my_user->usertype == 1)
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary"
+                                                    data-toggle="modal"
+                                                    data-target="#EditAttendanceModal"
+                                                    onclick="attendanceEditFunction(
+                                                        {{ $attend->id }},
+                                                        '{{ $attend->time_in ? \Carbon\Carbon::parse($attend->time_in)->format('Y-m-d\TH:i') : '' }}',
+                                                        '{{ $attend->time_out ? \Carbon\Carbon::parse($attend->time_out)->format('Y-m-d\TH:i') : '' }}'
+                                                    )">
+                                                    <span class="fas fa-pen"></span>
+                                                </button>
+                                            </td>
+                                        @endif
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -154,6 +170,76 @@
 <form id="time_in" action="/attendance/store" method="POST" style="display: none;">
     @csrf
 </form>
+
+{{-- ====================================================================
+     MODAL: EDIT ATTENDANCE (Admin Only)
+==================================================================== --}}
+@if($my_user->usertype == 1)
+<div class="modal fade" id="EditAttendanceModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white">
+                    <span class="fas fa-pen"></span> Edit Attendance Record
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <form id="editAttendanceForm" action="" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+ 
+                    <div class="alert alert-warning py-2">
+                        <span class="fas fa-exclamation-triangle"></span>
+                        You are editing an attendance record as <strong>Admin</strong>. This action is logged.
+                    </div>
+ 
+                    <div class="form-group">
+                        <label>Time In <span class="text-danger">*</span></label>
+                        <input type="datetime-local"
+                               class="form-control"
+                               id="edit_att_time_in"
+                               name="time_in"
+                               required>
+                        <small class="form-text text-muted">Leave as-is if you only want to change Time Out.</small>
+                    </div>
+ 
+                    <div class="form-group">
+                        <label>Time Out</label>
+                        <input type="datetime-local"
+                               class="form-control"
+                               id="edit_att_time_out"
+                               name="time_out">
+                        <small class="form-text text-muted">Leave blank if the user has not timed out yet.</small>
+                    </div>
+ 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="fas fa-save"></span> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+
+<script>
+    // ── Admin: Populate Edit Attendance Modal ────────────────────────────
+    function attendanceEditFunction(id, time_in, time_out) {
+        // Point the form to the correct record
+        $('#editAttendanceForm').attr('action', '/attendance/admin-update/' + id);
+ 
+        // Populate datetime-local inputs
+        // The format passed from Blade is already Y-m-d\TH:i (e.g. "2024-05-01T08:30")
+        $('#edit_att_time_in').val(time_in);
+        $('#edit_att_time_out').val(time_out);
+    }
+</script>
 
 <script>
 
